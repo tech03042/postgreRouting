@@ -1,6 +1,9 @@
+set schema 'kdelab';
+
 DROP FUNCTION IF EXISTS rcalc(integer, integer);
 DROP FUNCTION IF EXISTS rcalc(integer, integer, boolean);
 DROP FUNCTION IF EXISTS rcalc(integer, integer, boolean, boolean);
+
 CREATE FUNCTION rcalc(source integer, target integer, double_undirected boolean, use_te_flag boolean)
   RETURNS BOOLEAN AS $$
 DECLARE
@@ -108,9 +111,10 @@ BEGIN
 
   IF !use_te_flag
   THEN
-    ALTER TABLE te DROP setNotUse;
-  END IF
-  
+    ALTER TABLE te
+      DROP setNotUse;
+  END IF;
+
   DROP TABLE IF EXISTS rb;
   CREATE UNLOGGED TABLE rb (
     nid INT PRIMARY KEY
@@ -122,3 +126,6 @@ END;
 $$
 LANGUAGE plpgsql;
 
+
+select *
+from rcalc(1985, 619343, true, FALSE);
