@@ -10,25 +10,18 @@
 - bi-directional FEM Thread, TA Index ( Seo, Kwak )
 
 ```java
-        try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
+try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
+        shortestPathBuilder.Option(new TETableClear()); // DataSet Table-1
+        shortestPathBuilder.Option(new TEViewClear()); // DataSet Table Clear-2
+        shortestPathBuilder.Option(new NormalImporter(dataSet)); // Create DataSet Table
 
-            if (!remainTE)
-                shortestPathBuilder.Option(new TETableClear());
-
-            shortestPathBuilder.Option(new TEViewClear());
-
-            if (!remainTE)
-                shortestPathBuilder.Option(new NormalImporter(dataSet));
-
-            shortestPathBuilder
-                    // Build TE TABLE
-                    .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
-                    // TA Clear
-                    .Option(new PrepareBDThread(true))
-                    // BD Thread Table Prepare
-                    .Runner(new BiDirectionalThread(100, BiDirectionalThread.THREAD_USE_RB));
-            shortestPathBuilder.prepare();
-            return shortestPathBuilder.run(source, target);
-        }
+        shortestPathBuilder
+                .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
+                // Algorithm data table
+                .Option(new PrepareBDThread(true))
+                .Runner(new BiDirectionalThread(100, BiDirectionalThread.THREAD_USE_RB));
+        shortestPathBuilder.prepare();
+        System.out.println(shortestPathBuilder.run(source, target));
+}
 
 ```
