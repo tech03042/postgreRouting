@@ -67,13 +67,12 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
 ```java
 // after prepared DataSet Table ( FULL TE )
 try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
-    if (calculator.calc(13576, 245646))
-        System.out.println("계산 끝. rb table");
-    else
-        throw new IOException("계산 실패함.");
+        if (calculator.calc(13576, 245646))
+                System.out.println("Successed");
+        else
+                throw new IOException("Failed");
 } catch (SQLException | IOException | InterruptedException e) {
-    System.out.println("계산 실패");
-    e.printStackTrace();
+        System.out.println("Error");
 }
 
 ```
