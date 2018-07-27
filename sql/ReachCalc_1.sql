@@ -4,19 +4,22 @@ DROP FUNCTION IF EXISTS rcalc(integer, integer);
 DROP FUNCTION IF EXISTS rcalc(integer, integer, boolean);
 DROP FUNCTION IF EXISTS rcalc(integer, integer, boolean, boolean);
 
+
 CREATE FUNCTION rcalc(source integer, target integer, double_undirected boolean, use_te_flag boolean)
   RETURNS BOOLEAN AS $$
 DECLARE
   affected integer;
 BEGIN
-  CREATE TEMP TABLE visited (
+  DROP TABLE IF EXISTS visited;
+  DROP TABLE IF EXISTS expandTarget;
+  CREATE UNLOGGED TABLE visited (
     nid int,
     p2s int,
     PRIMARY KEY (nid, p2s)
-  ) ON COMMIT DROP;
-  CREATE TEMP TABLE expandTarget (
+  );
+  CREATE UNLOGGED TABLE expandTarget (
     nid int PRIMARY KEY
-  ) ON COMMIT DROP;
+  );
 
   --   INSERT INTO expandTargetUnique (nid) VALUES (source), (target);
   INSERT INTO expandTarget (nid) VALUES (source);
@@ -48,14 +51,13 @@ BEGIN
 
   DROP TABLE expandTarget;
 
-  raise notice 'END';
   CREATE TEMP TABLE deleteNids (
     nid int primary key
   ) ON COMMIT DROP;
 
+
   ALTER TABLE te
     ADD setNotUse boolean DEFAULT false;
-
   LOOP
     IF double_undirected
     THEN
@@ -78,7 +80,7 @@ BEGIN
                                               or visited.p2s = deleteNids.nid;
 
       UPDATE te
-      SET te.setNotUse = true
+      SET setNotUse = true
       FROM deleteNids
       WHERE te.fid = deleteNids.nid
          or te.tid = deleteNids.nid;
@@ -90,13 +92,13 @@ BEGIN
                   te
              WHERE (visited.nid = te.tid
                       or visited.nid = te.fid)
-               and te.setNoutUse = false
+               and te.setNotUse = false
              GROUP BY visited.nid) tmp
       WHERE visited.nid = tmp.nid and cnt = 1
             AND visited.nid <> source and visited.nid <> target
       RETURNING visited.nid, visited.p2s)
       UPDATE te
-      SET te.setNotUse = true
+      SET setNotUse = true
       FROM a
       WHERE te.tid = a.nid;
     end if;
@@ -109,7 +111,7 @@ BEGIN
     END IF;
   END LOOP;
 
-  IF !use_te_flag
+  IF use_te_flag=FALSE
   THEN
     ALTER TABLE te
       DROP setNotUse;
@@ -120,6 +122,8 @@ BEGIN
     nid INT PRIMARY KEY
   );
   INSERT INTO rb (nid) SELECT distinct nid FROM visited;
+
+  DROP TABLE IF EXISTS visited;
 
   RETURN TRUE;
 END;

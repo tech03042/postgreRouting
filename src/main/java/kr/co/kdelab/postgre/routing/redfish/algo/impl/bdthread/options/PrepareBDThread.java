@@ -42,7 +42,7 @@ public class PrepareBDThread extends ShortestPathOption {
                         "  PRIMARY KEY (nid)\n" +
                         ");\n");
 
-                statement.execute("CREATE OR REPLACE VIEW te2 AS select te.tid AS fid,te.fid AS tid,te.cost AS cost from te");
+                statement.execute("DROP TABLE IF EXISTS te2; CREATE OR REPLACE VIEW te2 AS select te.tid AS fid,te.fid AS tid,te.cost AS cost from te;");
 
                 statement.execute("CREATE INDEX IF NOT EXISTS TE_FID_IDX ON te USING hash(fid)");
                 statement.execute("CREATE INDEX IF NOT EXISTS TE_TID_IDX ON te USING hash(tid)");

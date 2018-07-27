@@ -12,7 +12,7 @@ public class JoinCalc {
                 "\n" +
                 "-- 시작점, 도착점, (Forward: true,Backward: false) 구분\n" +
                 "CREATE FUNCTION joinCalcFunction(start integer, target integer, isForward bool)\n" +
-                "  RETURNS SETOF integer\n" +
+                "  RETURNS BOOLEAN\n" +
                 "AS $$\n" +
                 "DECLARE\n" +
                 "  affected integer;\n" +
@@ -98,16 +98,14 @@ public class JoinCalc {
                 "      SELECT DISTINCT nid\n" +
                 "      FROM visited;\n" +
                 "  end if;\n" +
-                "  return query select 1;\n" +
+                "  RETURN TRUE;\n" +
                 "END;\n" +
                 "$$\n" +
                 "LANGUAGE plpgsql;\n");
 
-        if (1 == 1)
-            return;
 
         try (JoinCalculator calculator = new JoinCalculator(new JDBConnectionInfo("jdbc:postgresql://localhost:5432/kdelab", "postgres", "icdwvb4j", "kdelab"))) {
-            if (calculator.calc(13576, 245646))
+            if (calculator.calc(1, 10))
                 System.out.println("계산 끝. rb table");
             else
                 throw new IOException("계산 실패함.");
