@@ -59,18 +59,24 @@ public class JoinCalculator extends RechabliltyCalculator {
         }
     }
 
-    public boolean calc(int source, int target) throws SQLException, InterruptedException {
-        Division divisions[] = new Division[]{new Division(source, target, true), new Division(source, target, false)};
-        for (Division division : divisions)
-            division.start();
-        while (divisions[0].state != JoinCalculatorThreadState.SUCCESS && divisions[1].state != JoinCalculatorThreadState.SUCCESS) {
-            if (divisions[0].state == JoinCalculatorThreadState.ERROR || divisions[1].state == JoinCalculatorThreadState.ERROR) {
-                return false;
-            }
-            Thread.sleep(10);
-        }
 
-        joinRB.execute();
+    @Override
+    public boolean calc(int source, int target) {
+        try {
+            Division divisions[] = new Division[]{new Division(source, target, true), new Division(source, target, false)};
+            for (Division division : divisions)
+                division.start();
+            while (divisions[0].state != JoinCalculatorThreadState.SUCCESS && divisions[1].state != JoinCalculatorThreadState.SUCCESS) {
+                if (divisions[0].state == JoinCalculatorThreadState.ERROR || divisions[1].state == JoinCalculatorThreadState.ERROR) {
+                    return false;
+                }
+                Thread.sleep(10);
+            }
+
+            joinRB.execute();
+        } catch (Exception e) {
+            return false;
+        }
         return true;
     }
 

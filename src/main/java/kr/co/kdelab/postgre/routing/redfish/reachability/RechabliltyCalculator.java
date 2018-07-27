@@ -25,9 +25,13 @@ public class RechabliltyCalculator implements Closeable {
         return connection;
     }
 
-    protected PreparedStatement newPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+    protected PreparedStatement newPreparedStatement(PreparedStatement preparedStatement) {
         preparedStatements.add(preparedStatement);
         return preparedStatement;
+    }
+
+    public boolean calc(int source, int target) throws SQLException {
+        return false;
     }
 
     protected Statement getCloseStatement() {
