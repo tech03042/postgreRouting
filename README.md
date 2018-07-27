@@ -10,6 +10,14 @@
 - bi-directional FEM Thread, TA Index ( Seo, Kwak )
 
 ### 사용 예제
+Public
+```java
+var jDBConnectionInfo = new JDBConnectionInfo("DBURL", "USERID", "USERPW", "SCHEMA");
+// JDBC Connection용 객체
+// ( var 문법은 JDK 10 이상부터 지원함. )
+
+```
+
 1. bi-directional FEM Thread
 ```java
 try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
@@ -45,4 +53,27 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
         shortestPathBuilder.prepare();
         System.out.println(shortestPathBuilder.run(source, target));
 }
+```
+3. DataSet Table Prepare
+```java
+try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
+        shortestPathBuilder.Option(new TETableClear())
+                .Option(new TEViewClear())
+                .Option(new NormalImporter(dataSet))
+        shortestPathBuilder.prepare();
+}
+```
+4. Rechability Method
+```java
+// after prepared DataSet Table ( FULL TE )
+try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
+    if (calculator.calc(13576, 245646))
+        System.out.println("계산 끝. rb table");
+    else
+        throw new IOException("계산 실패함.");
+} catch (SQLException | IOException | InterruptedException e) {
+    System.out.println("계산 실패");
+    e.printStackTrace();
+}
+
 ```
