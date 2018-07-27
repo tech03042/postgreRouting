@@ -89,8 +89,8 @@ try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, tru
         System.out.println("Error");
 }
 ```
-Delay - 28988 ms
+Make Rechablility = 28988 ms
 
-USE RB = 7080 ms
+USE RB SHORTEST PATH = 7080 ms
 
-NORMAL = 58754 ms 
+NORMAL SHORTEST PATH = 58754 ms 
