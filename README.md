@@ -77,7 +77,7 @@ try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
 
 ```
 결과 검증용 |
-`1 2 3
+1 2 3
 
 2 3 4
 
@@ -89,5 +89,5 @@ try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
 
 11 12 13
 
-12 13 14`
+12 13 14`|
 
