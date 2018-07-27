@@ -63,7 +63,7 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
         shortestPathBuilder.prepare();
 }
 ```
-4. Rechability Method
+4-1. Rechability Method - Join
 ```java
 // after prepared DataSet Table ( FULL TE )
 try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
@@ -76,3 +76,21 @@ try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
 }
 
 ```
+4-2. Rechability Method - Version_1
+```java
+// after prepared DataSet Table ( FULL TE )
+// Submit1Calculator ( JDBConnectionInfo, doubleUndirected # USA_ROAD-TRUE )
+try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, true)) {
+        if (calculator.calc(13576, 245646))
+                System.out.println("Successed");
+        else
+                throw new IOException("Failed");
+} catch (SQLException | IOException | InterruptedException e) {
+        System.out.println("Error");
+}
+```
+Make Rechablility = 28988 ms
+
+USE RB SHORTEST PATH = 7080 ms
+
+NORMAL SHORTEST PATH = 58754 ms 
