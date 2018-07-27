@@ -89,7 +89,7 @@ try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, tru
         System.out.println("Error");
 }
 ```
-! Delay - ~28988 ms
+Delay - 28988 ms
 
 USE RB = 7080 ms
 
