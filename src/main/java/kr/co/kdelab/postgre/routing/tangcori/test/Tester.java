@@ -61,12 +61,13 @@ public class Tester {
         //        filename = "./resources/papergraph.txt";
 //        filename = "./resources/random_1000_10000_1.txt";
 //        filename = "./resources/random_5000_50000_10.txt";
-        filename = "./resources/USA-road-t.NY.gr";
+//        filename = "./resources/USA-road-t.NY.gr";
 //        filename = "./resources/USA-road-t.W.gr"; // 17m
 //        filename = "./resources/USA-road-t.COL.gr";
 //        filename = "./resources/USA-road-t.FLA.gr"; // 1m 18s
 //        filename = "./resources/USA-road-t.USA.gr";
 //        filename = "./resources/directed_50000.txt";
+        filename = "./resources/yago.yago";
 
         switch (filename) {
             case "./resources/papergraph.txt":
@@ -102,6 +103,10 @@ public class Tester {
                 target = 1062403;
                 break;
             case "./resources/directed_50000.txt":
+                source = 324;
+                target = 45774;
+                break;
+            case "./resources/yago.yago":
                 source = 324;
                 target = 45774;
                 break;

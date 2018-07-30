@@ -11,6 +11,8 @@ public class Yago extends TestSet {
     private String[] cache = null;
     private int currentIndex;
 
+    private boolean ignoreFirstTime = false;
+
     public Yago(File file) throws FileNotFoundException {
         super(file);
     }
@@ -24,6 +26,11 @@ public class Yago extends TestSet {
         try {
             if (cache == null) {
                 do {
+                    if (!ignoreFirstTime) {
+                        readLineInternal();
+                        ignoreFirstTime = true;
+                    }
+
                     String plainData = readLineInternal();
                     if (plainData == null)
                         return null;
