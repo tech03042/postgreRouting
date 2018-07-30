@@ -59,7 +59,7 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
 try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
         shortestPathBuilder.Option(new TETableClear())
                 .Option(new TEViewClear())
-                .Option(new NormalImporter(dataSet))
+                .Option(new NormalImporter(dataSet)) // PartitioningImporter(dataSet, pts, pv, requireFullTe)
         shortestPathBuilder.prepare();
 }
 ```
@@ -89,8 +89,7 @@ try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, tru
         System.out.println("Error");
 }
 ```
-Make Rechablility = 28988 ms
-
-USE RB SHORTEST PATH = 7080 ms
-
-NORMAL SHORTEST PATH = 58754 ms 
+##### History
+- 잘못된 지우기 쿼리 수정 ( 180728 )
+- pgPL/SQL -> 개별적인 쿼리로 수정 ( 180728 )
+- BDThread(NY, 13576 => 245646) 28988 ms(R)+7080 ms (R), 58754 ms (N)
