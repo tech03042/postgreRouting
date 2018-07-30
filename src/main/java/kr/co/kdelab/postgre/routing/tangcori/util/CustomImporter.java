@@ -2,6 +2,7 @@ package kr.co.kdelab.postgre.routing.tangcori.util;
 
 import kr.co.kdelab.postgre.routing.parser.Random;
 import kr.co.kdelab.postgre.routing.parser.USARoad;
+import kr.co.kdelab.postgre.routing.parser.Yago;
 import kr.co.kdelab.postgre.routing.parser.applier.PostgrePartitioningApplier;
 import kr.co.kdelab.postgre.routing.parser.internal.TestSet;
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathOption;
@@ -31,6 +32,8 @@ public class CustomImporter extends ShortestPathOption {
         TestSet testSet;
         if (dataSet.endsWith(".gr"))
             testSet = new USARoad(new File(dataSet));
+        else if (dataSet.endsWith(".yago"))
+            testSet = new Yago(new File(dataSet));
         else
             testSet = new Random(new File(dataSet));
 
