@@ -9,7 +9,7 @@ import java.sql.Statement;
 
 public class CustomApplier extends TableApplier {
 
-    private int builderBufferSize = 40000000;
+    private int builderBufferSize = 20000000;
     private int pts, pv;
 
     public CustomApplier(int pts, int pv) {
