@@ -89,6 +89,10 @@ try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, tru
         System.out.println("Error");
 }
 ```
+##### History
+- 잘못된 지우기 쿼리 수정
+- pgPL/SQL -> 개별적인 쿼리로 수정
+
 Make Rechablility = 28988 ms
 
 USE RB SHORTEST PATH = 7080 ms
