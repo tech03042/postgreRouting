@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public abstract class TableApplier {
-    TestSet testSetReader = null;
+    protected TestSet testSetReader = null;
 
     public TableApplier() {
 
