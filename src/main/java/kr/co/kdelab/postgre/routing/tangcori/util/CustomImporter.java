@@ -17,14 +17,12 @@ public class CustomImporter extends ShortestPathOption {
     private String dataSet;
     private int pts;
     private int pv;
-    private boolean usingFullTe;
 
-    public CustomImporter(String dataSet, int pts, int pv, boolean usingFullTe) {
+    public CustomImporter(String dataSet, int pts, int pv) {
         super(ShortestPathOptionType.PRE_LOAD);
         this.dataSet = dataSet;
         this.pts = pts;
         this.pv = pv;
-        this.usingFullTe = usingFullTe;
     }
 
     @Override
@@ -37,7 +35,7 @@ public class CustomImporter extends ShortestPathOption {
         else
             testSet = new Random(new File(dataSet));
 
-        testSet.setApplier(new CustomApplier(pts, pv, usingFullTe));
+        testSet.setApplier(new CustomApplier(pts, pv));
         try (Connection connection = jdbConnectionInfo.createConnection()) {
             testSet.applyInTable(connection);
 

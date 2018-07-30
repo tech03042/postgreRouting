@@ -17,46 +17,47 @@ public class Submit1Calculator extends RechabliltyCalculator {
 
     @Override
     public boolean calc(int source, int target) throws SQLException {
-        PreparedStatement expander = newPreparedStatement(getConnection().prepareStatement("    WITH expandTargetClear AS (DELETE FROM expandTarget\n" +
-                "    RETURNING nid),\n" +
-                "         findNewTarget AS (INSERT INTO visited (nid, p2s)\n" +
-                "      SELECT te.tid, te.fid\n" +
-                "      FROM te,\n" +
-                "           expandTargetClear\n" +
-                "      WHERE expandTargetClear.nid = te.fid\n" +
-                "    ON CONFLICT DO NOTHING\n" +
-                "    RETURNING nid),\n" +
-                "         targetDistinct AS (INSERT INTO expandTargetWrap (nid) SELECT nid FROM findNewTarget\n" +
-                "    ON CONFLICT DO NOTHING\n" +
-                "    RETURNING nid)\n" +
-                "    INSERT INTO expandTarget (nid)\n" +
-                "    SELECT nid\n" +
-                "    FROM findNewTarget\n" +
-                "    ON CONFLICT DO NOTHING;\n"));
+        PreparedStatement expander;
         PreparedStatement deleter;
 
         try (Statement statement = getConnection().createStatement()) {
-            statement.execute("" +
-                    "  DROP TABLE IF EXISTS visited;\n" +
-                    "  DROP TABLE IF EXISTS expandTarget;\n" +
-                    "  DROP TABLE IF EXISTS expandTargetWrap;\n" +
-                    "  CREATE UNLOGGED TABLE visited (\n" +
-                    "    nid int,\n" +
-                    "    p2s int,\n" +
-                    "    PRIMARY KEY (nid, p2s)\n" +
-                    "  );\n" +
-                    "  CREATE UNLOGGED TABLE expandTarget (\n" +
-                    "    nid int PRIMARY KEY\n" +
-                    "  );\n" +
-                    "  CREATE UNLOGGED TABLE expandTargetWrap (\n" +
-                    "    nid INT PRIMARY KEY\n" +
-                    "  );\n");
+            statement.execute(
+                    "  CREATE UNLOGGED TABLE IF NOT EXISTS visited (\n" +
+                            "    nid int,\n" +
+                            "    p2s int,\n" +
+                            "    PRIMARY KEY (nid, p2s)\n" +
+                            "  );\n" +
+                            "  CREATE UNLOGGED TABLE IF NOT EXISTS expandTarget (\n" +
+                            "    nid int PRIMARY KEY\n" +
+                            "  );\n" +
+                            "  CREATE UNLOGGED TABLE IF NOT EXISTS expandTargetWrap (\n" +
+                            "    nid INT PRIMARY KEY\n" +
+                            "  );\n");
+            statement.execute("TRUNCATE TABLE visited");
+            statement.execute("TRUNCATE TABLE expandTarget");
+            statement.execute("TRUNCATE TABLE expandTargetWrap");
 
             statement.execute("INSERT INTO expandTarget (nid) VALUES (" + source + ");");
 
+            expander = newPreparedStatement(getConnection().prepareStatement("    WITH expandTargetClear AS (DELETE FROM expandTarget\n" +
+                    "    RETURNING nid),\n" +
+                    "         findNewTarget AS (INSERT INTO visited (nid, p2s)\n" +
+                    "      SELECT te.tid, te.fid\n" +
+                    "      FROM te,\n" +
+                    "           expandTargetClear\n" +
+                    "      WHERE expandTargetClear.nid = te.fid\n" +
+                    "    ON CONFLICT DO NOTHING\n" +
+                    "    RETURNING nid),\n" +
+                    "         targetDistinct AS (INSERT INTO expandTargetWrap (nid) SELECT nid FROM findNewTarget\n" +
+                    "    ON CONFLICT DO NOTHING\n" +
+                    "    RETURNING nid)\n" +
+                    "    INSERT INTO expandTarget (nid)\n" +
+                    "    SELECT nid\n" +
+                    "    FROM findNewTarget\n" +
+                    "    ON CONFLICT DO NOTHING;\n"));
             while (expander.executeUpdate() != 0) ;
 
-            statement.execute("DROP TABLE IF EXISTS expandTarget; DROP TABLE IF EXISTS expandTargetWrap;");
+            statement.execute("TRUNCATE TABLE expandTarget; TRUNCATE TABLE expandTargetWrap;");
 
             statement.execute("DROP TABLE IF EXISTS deleteNids;");
             statement.execute("CREATE UNLOGGED TABLE deleteNids (nid int primary key);");

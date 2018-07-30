@@ -11,13 +11,11 @@ public class CustomApplier extends TableApplier {
 
     private int builderBufferSize = 40000000;
     private int pts, pv;
-    private boolean usingFullTe;
 
-    public CustomApplier(int pts, int pv, boolean usingFullTe) {
+    public CustomApplier(int pts, int pv) {
         this(-1);
         this.pts = pts;
         this.pv = pv;
-        this.usingFullTe = usingFullTe;
     }
 
     private CustomApplier(int builderBufferSize) {
@@ -29,74 +27,43 @@ public class CustomApplier extends TableApplier {
     //    0~pts
     @Override
     public void applyInTable(Connection connection) throws SQLException {
-        final String createTeTail = "(fid int, tid int, cost int)";
-        final String createTeHead = "create table IF NOT EXISTS te";
+        StringBuilder baseSQL = new StringBuilder("INSERT INTO TE(fid, tid, cost) values");
+        StringBuilder appended = new StringBuilder();
+        String tail = "ON CONFLICT (fid, tid) DO NOTHING";
 
         connection.setAutoCommit(false);
+
         try (Statement statement = connection.createStatement()) {
-            String baseSQL[] = new String[pts];
-            StringBuilder appended[] = new StringBuilder[pts];
-            for (int i = 0; i < pts; i++) {
-                baseSQL[i] = String.format("INSERT INTO te_%d(fid, tid, cost) values", i + 1);
-                appended[i] = new StringBuilder();
-
-
-                statement.execute(createTeHead + "_" + (i + 1) + createTeTail);
-                statement.execute("DELETE FROM TE_" + (i + 1));
-            }
-
-            String mainBaseSQL = null;
-            StringBuilder mainAppended = null;
-            if (usingFullTe) {
-                statement.execute(createTeHead + createTeTail);
-                statement.execute("DELETE FROM TE");
-
-                mainBaseSQL = "INSERT INTO te(fid, tid, cost) values";
-                mainAppended = new StringBuilder();
-//            Main TE
-            }
-
+            statement.execute("DROP TABLE IF EXISTS TE CASCADE");
+            statement.execute("CREATE UNLOGGED TABLE TE(fid int, tid int, cost int, PRIMARY KEY (fid, tid))");
 
             TestSetFormat testSetFormat;
             while ((testSetFormat = testSetReader.readLine()) != null) {
-                int index = (int) testSetFormat.getWeight() / pv;
-                if (appended[index].length() != 0)
-                    appended[index].append(",");
-                appended[index].append("(").append(testSetFormat.getNodeId()).append(",").append(testSetFormat.getTargetId()).append(",").append((int) testSetFormat.getWeight()).append(")");
+                if (appended.length() != 0)
+                    appended.append(",");
+                appended.append("(").append(testSetFormat.getNodeId()).append(",").append(testSetFormat.getTargetId()).append(",").append((int) testSetFormat.getWeight()).append(")");
 
-                if (appended[index].length() > builderBufferSize) {
-                    statement.execute(baseSQL[index] + appended[index].toString());
-                    appended[index] = new StringBuilder();
+                if (appended.length() > builderBufferSize) {
+                    statement.execute(baseSQL.toString() + appended.toString() + tail);
+                    appended = new StringBuilder();
                     connection.commit();
                 }
-//                Partitioning Parts
-
-
-                if (usingFullTe && mainAppended != null) {
-                    if (mainAppended.length() != 0)
-                        mainAppended.append(",");
-                    mainAppended.append("(").append(testSetFormat.getNodeId()).append(",").append(testSetFormat.getTargetId()).append(",").append((int) testSetFormat.getWeight()).append(")");
-                    if (mainAppended.length() > builderBufferSize) {
-                        statement.execute(mainBaseSQL + mainAppended.toString());
-                        mainAppended = new StringBuilder();
-                        connection.commit();
-                    }
-                }
-
             }
 
-            for (int i = 0; i < pts; i++)
-                if (appended[i].length() != 0)
-                    statement.execute(baseSQL[i] + appended[i].toString());
-
-            if (usingFullTe && mainAppended != null) {
-                if (mainAppended.length() != 0)
-                    statement.execute(mainBaseSQL + mainAppended.toString());
+            if (appended.length() != 0) {
+                statement.execute(baseSQL.toString() + appended.toString() + tail);
             }
+            connection.commit();
+
+            for (int i = 0; i < pts; i++) {
+                long min = pv * i, max = pv * (i + 1);
+                statement.execute("CREATE UNLOGGED TABLE TE_" + (i + 1) + "(fid int, tid int, cost int, PRIMARY KEY (fid, tid))");
+                statement.execute("INSERT INTO TE_" + (i + 1) + "(fid, tid, cost) SELECT fid, tid, cost FROM te WHERE cost >= " + min + " AND cost <=" + max + " ON CONFLICT DO NOTHING ");
+            }
+            connection.commit();
         }
 
-        connection.commit();
-        connection.setAutoCommit(true);
 
+        connection.setAutoCommit(true);
     }
 }

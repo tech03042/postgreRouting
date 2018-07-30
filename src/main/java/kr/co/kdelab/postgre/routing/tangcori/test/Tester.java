@@ -34,7 +34,7 @@ public class Tester {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
             shortestPathBuilder.Option(new TETableClear())
                     .Option(new TEViewClear())
-                    .Option(new CustomImporter(dataSet, pts, pv, true));
+                    .Option(new CustomImporter(dataSet, pts, pv));
             shortestPathBuilder.prepare();
         }
     }

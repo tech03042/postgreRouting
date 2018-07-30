@@ -1,6 +1,5 @@
 package kr.co.kdelab.postgre.routing.redfish.algo.test;
 
-import kr.co.kdelab.postgre.routing.redfish.algo.DLog;
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathBuilder;
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathOptionType;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.bdthread.BiDirectionalThread;
@@ -26,7 +25,7 @@ public class RunnerTest {
             shortestPathBuilder.Option(new TEViewClear());
 
             if (!remainTe)
-                shortestPathBuilder.Option(new PartitioningImporter(dataSet, pts, pv, true));
+                shortestPathBuilder.Option(new PartitioningImporter(dataSet, pts, pv));
 
             shortestPathBuilder
                     .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
@@ -48,7 +47,7 @@ public class RunnerTest {
             shortestPathBuilder.Option(new TEViewClear());
 
             if (!remainTe)
-                shortestPathBuilder.Option(new PartitioningImporter(dataSet, pts, pv, true));
+                shortestPathBuilder.Option(new PartitioningImporter(dataSet, pts, pv));
 
             shortestPathBuilder
                     .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
