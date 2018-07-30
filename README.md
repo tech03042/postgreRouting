@@ -4,10 +4,11 @@
 - https://www.researchgate.net/publication/259744306_Shortest_Path_Computing_in_Relational_DBMSs
 
 제공하는 알고리즘 리스트
-- bi-directional restrictive BFS ( Jun. Gao )
-- bi-directional FEM ( Jun. Gao )
-- bi-directional FEM Thread ( Seo, Kwak )
-- bi-directional FEM Thread, TA Index ( Seo, Kwak )
+- bi-directional restrictive BFS ( Jun. Gao ) Seo, Kwak implemented.
+- bi-directional FEM ( Jun. Gao ) Seo, Kwak implemented.
+- bi-directional FEM Thread ( Seo, Kwak ) Seo, Kwak implemented.
+- bi-directional FEM Thread, TA Index ( Seo, Kwak ) Seo, Kwak implemented.
+- bi-directional restrictive BFS Seo implemented.
 
 ### 사용 예제
 Public
@@ -87,6 +88,29 @@ try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, tru
                 throw new IOException("Failed");
 } catch (SQLException | IOException | InterruptedException e) {
         System.out.println("Error");
+}
+```
+5-1. Seo, implemented. RBFS
+```java
+try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
+    shortestPathBuilder.Option(new TETableClear())
+            .Option(new TEViewClear())
+            .Option(new CustomImporter(dataSet, pts, pv, true));
+    shortestPathBuilder.prepare();
+}
+```
+
+```java
+try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
+    shortestPathBuilder
+            .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
+            // TA Clear
+            .Option(new ERClear())
+            .Option(new PrepareSeoRBFS())
+            // BD Thread Table Prepare
+            .Runner(new SeoRBFSRunnerReached(pts, pv));
+    shortestPathBuilder.prepare();
+    return shortestPathBuilder.run(source, target);
 }
 ```
 ##### History
