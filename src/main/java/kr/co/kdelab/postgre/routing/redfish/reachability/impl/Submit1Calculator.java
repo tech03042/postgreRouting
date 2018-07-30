@@ -16,7 +16,7 @@ public class Submit1Calculator extends RechabliltyCalculator {
     }
 
     @Override
-    public boolean calc(int source, int target) throws SQLException {
+    public boolean calc(int source, int target) {
         PreparedStatement expander;
         PreparedStatement deleter;
 
@@ -57,10 +57,11 @@ public class Submit1Calculator extends RechabliltyCalculator {
                     "    ON CONFLICT DO NOTHING;\n"));
             while (expander.executeUpdate() != 0) ;
 
-            statement.execute("TRUNCATE TABLE expandTarget; TRUNCATE TABLE expandTargetWrap;");
+            statement.execute("TRUNCATE TABLE expandTarget;");
+            statement.execute("TRUNCATE TABLE expandTargetWrap;");
 
-            statement.execute("DROP TABLE IF EXISTS deleteNids;");
-            statement.execute("CREATE UNLOGGED TABLE deleteNids (nid int primary key);");
+            statement.execute("CREATE UNLOGGED TABLE IF NOT EXISTS deleteNids (nid int primary key);");
+            statement.execute("TRUNCATE TABLE deleteNids;");
             statement.execute("ALTER TABLE te ADD setNotUse boolean DEFAULT false;");
 
             if (doubleUndirected) {
@@ -105,13 +106,10 @@ public class Submit1Calculator extends RechabliltyCalculator {
 
             statement.execute("ALTER TABLE te DROP setNotUse;");
 
-            statement.execute("DROP TABLE IF EXISTS deleteNids; DROP TABLE IF EXISTS rb;" +
-                    "  CREATE UNLOGGED TABLE rb (\n" +
-                    "    nid INT PRIMARY KEY\n" +
-                    "  );\n" +
-                    "  INSERT INTO rb (nid) SELECT distinct nid FROM visited;\n" +
-                    "\n" +
-                    "  DROP TABLE IF EXISTS visited;");
+            statement.execute("  CREATE UNLOGGED TABLE IF NOT EXISTS rb (\n" +
+                    "    nid INT PRIMARY KEY)");
+            statement.execute("TRUNCATE TABLE rb;");
+            statement.execute("  INSERT INTO rb (nid) SELECT distinct nid FROM visited;");
 
         } catch (SQLException e) {
             e.printStackTrace();
