@@ -90,11 +90,6 @@ try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, tru
 }
 ```
 ##### History
-- 잘못된 지우기 쿼리 수정
-- pgPL/SQL -> 개별적인 쿼리로 수정
-
-Make Rechablility = 28988 ms
-
-USE RB SHORTEST PATH = 7080 ms
-
-NORMAL SHORTEST PATH = 58754 ms 
+- 잘못된 지우기 쿼리 수정 ( 180728 )
+- pgPL/SQL -> 개별적인 쿼리로 수정 ( 180728 )
+- BDThread(NY, 13576 => 245646) 28988 ms(R)+7080 ms (R), 58754 ms (N)
