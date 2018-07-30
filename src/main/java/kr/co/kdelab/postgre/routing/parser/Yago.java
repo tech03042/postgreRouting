@@ -16,7 +16,7 @@ public class Yago extends TestSet {
     }
 
     private double getCost() {
-        return Math.random() * 100;
+        return Math.abs(Math.random() * 99) + 1;
     }
 
     @Override
