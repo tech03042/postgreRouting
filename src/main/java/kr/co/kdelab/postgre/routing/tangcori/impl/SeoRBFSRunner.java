@@ -62,6 +62,7 @@ public abstract class SeoRBFSRunner extends ShortestPathRunner {
     @Override
     public RunningResult run() throws Exception {
         long start_t = System.currentTimeMillis();
+        prepare();
 
         float minCost = Integer.MAX_VALUE; // minCost
         float minCost0 = 0;

@@ -3,6 +3,7 @@ package kr.co.kdelab.postgre.routing.tangcori.test;
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathBuilder;
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathOptionType;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResult;
+import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.ERClear;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.TAClear;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.TETableClear;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.TEViewClear;
@@ -20,6 +21,7 @@ public class Tester {
             shortestPathBuilder
                     .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
                     // TA Clear
+                    .Option(new ERClear())
                     .Option(new PrepareSeoRBFS())
                     // BD Thread Table Prepare
                     .Runner(new SeoRBFSRunnerReached(pts, pv));
