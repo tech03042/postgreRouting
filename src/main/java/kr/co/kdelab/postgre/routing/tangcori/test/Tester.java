@@ -41,7 +41,7 @@ public class Tester {
 
     public static void main(String[] args) throws Exception {
         JDBConnectionInfo jdbConnectionInfo = new JDBConnectionInfo("jdbc:postgresql://localhost:5432/kdelab",
-                "postgres", "icdwvb4j", "kdelab");
+                "postgres", "kdelab", "kdelab");
 
 
         // logFile이 NULL 이 아니면 해당 파일을 Console Output으로 대체함.
@@ -61,12 +61,13 @@ public class Tester {
         //        filename = "./resources/papergraph.txt";
 //        filename = "./resources/random_1000_10000_1.txt";
 //        filename = "./resources/random_5000_50000_10.txt";
-        filename = "./resources/USA-road-t.NY.gr";
+//        filename = "./resources/USA-road-t.NY.gr";
 //        filename = "./resources/USA-road-t.W.gr"; // 17m
 //        filename = "./resources/USA-road-t.COL.gr";
 //        filename = "./resources/USA-road-t.FLA.gr"; // 1m 18s
 //        filename = "./resources/USA-road-t.USA.gr";
 //        filename = "./resources/directed_50000.txt";
+          filename = "./resources/yago.yago";
 
         switch (filename) {
             case "./resources/papergraph.txt":
@@ -105,6 +106,11 @@ public class Tester {
                 source = 324;
                 target = 45774;
                 break;
+            case "./resources/yago.yago":
+                source = 21235;
+                target = 234234;
+                break;
+
         }
         dataPrepare(jdbConnectionInfo, filename, pts, pv);
 
