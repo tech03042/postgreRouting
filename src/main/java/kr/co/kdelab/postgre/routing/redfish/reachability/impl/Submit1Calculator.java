@@ -8,12 +8,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class Submit1Calculator extends RechabliltyCalculator {
-    private final JDBConnectionInfo jdbConnectionInfo;
     private boolean doubleUndirected;
 
     public Submit1Calculator(JDBConnectionInfo jdbConnectionInfo, boolean doubleUndirected) throws SQLException {
         super(jdbConnectionInfo.createConnection());
-        this.jdbConnectionInfo = jdbConnectionInfo;
         this.doubleUndirected = doubleUndirected;
     }
 

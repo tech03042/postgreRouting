@@ -1,6 +1,7 @@
 package kr.co.kdelab.postgre.routing.redfish.reachability.test;
 
 import kr.co.kdelab.postgre.routing.redfish.reachability.impl.JoinCalculator;
+import kr.co.kdelab.postgre.routing.redfish.reachability.impl.Submit1Calculator;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 
 import java.io.IOException;
@@ -104,14 +105,13 @@ public class JoinCalc {
                 "LANGUAGE plpgsql;\n");
 
 
+        long s = System.currentTimeMillis();
         try (JoinCalculator calculator = new JoinCalculator(new JDBConnectionInfo("jdbc:postgresql://localhost:5432/kdelab", "postgres", "icdwvb4j", "kdelab"))) {
-            if (calculator.calc(1, 10))
-                System.out.println("계산 끝. rb table");
-            else
-                throw new IOException("계산 실패함.");
-        } catch (SQLException | IOException | InterruptedException e) {
-            System.out.println("계산 실패");
+            if (calculator.calc(13113, 435663))
+                System.out.println("계산 끝");
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
+        System.out.println(System.currentTimeMillis() - s);
     }
 }

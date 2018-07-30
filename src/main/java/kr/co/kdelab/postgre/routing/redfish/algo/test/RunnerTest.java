@@ -209,8 +209,8 @@ public class RunnerTest {
 //        filename = "./resources/random_1000_10000_1.txt";
 //        filename = "./resources/random_5000_50000_10.txt";
 //        filename = "./resources/USA-road-t.NY.gr";
-        filename = "./resources/USA-road-t.W.gr"; // 17m
-//        filename = "./resources/USA-road-t.COL.gr";
+//        filename = "./resources/USA-road-t.W.gr"; // 17m
+        filename = "./resources/USA-road-t.COL.gr";
 //        filename = "./resources/USA-road-t.FLA.gr"; // 1m 18s
 //        filename = "./resources/USA-road-t.USA.gr";
 //        filename = "./resources/directed_50000.txt";
@@ -275,9 +275,11 @@ public class RunnerTest {
 //            System.out.println(runningResult);
 //            logFile.append(runningResult.toString(filename)).append("\n");
 //        }
-
-
-        DLog.use = true;
+//
+//        dataPrepare(jdbConnectionInfo, filename);
+//        if (1 == 1)
+//            return;
+//        DLog.use = true;
         try (FileWriter logFile = new FileWriter("log/log_runner_test.txt", true)) {
             RunningResult runningResult;
 //
@@ -285,26 +287,29 @@ public class RunnerTest {
 //            // BI-R BFS
 //            System.out.println(runningResult);
 //            logFile.append(runningResult.toString(filename)).append("\n");
-//
-//
-//            runningResult = birbfsReached(jdbConnectionInfo, false, filename, pts, pv, source, target);
+////
+////
+//            runningResult = birbfsReached(jdbConnectionInfo, true, filename, pts, pv, source, target);
 //            // BI-R BFS
 //            System.out.println(runningResult);
 //            logFile.append(runningResult.toString(filename)).append("\n");
 //
 //
 
-//            runningResult = reachedBdThreadTaIndexed(jdbConnectionInfo, true, filename, source, target);
-//            // 그냥 BD Thread
-//
-//            System.out.println(runningResult);
-//            logFile.append(runningResult.toString(filename)).append("\n");
+            runningResult = bdThreadReached(jdbConnectionInfo, true, filename, source, target);
+            // 그냥 BD Thread
 
-            runningResult = bdThreadTaIndexed(jdbConnectionInfo, true, filename, source, target);
+            System.out.println(runningResult);
+            logFile.append(runningResult.toString(filename)).append("\n");
+
+            runningResult = bdThread(jdbConnectionInfo, true, filename, source, target);
             // TA 테이블 인덱스 버전
 
             System.out.println(runningResult);
             logFile.append(runningResult.toString(filename)).append("\n");
+
+//            filename = "./resources/reach_test.txt";
+//            dataPrepare(jdbConnectionInfo, filename);
         }
     }
 

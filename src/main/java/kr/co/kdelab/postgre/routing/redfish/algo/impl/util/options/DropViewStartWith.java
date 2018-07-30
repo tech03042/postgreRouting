@@ -11,8 +11,8 @@ import java.sql.Statement;
 public class DropViewStartWith extends ShortestPathOption {
     private String prefix;
 
-    public DropViewStartWith(boolean isPreLoad, String prefix) {
-        super(isPreLoad ? ShortestPathOptionType.PRE_LOAD : ShortestPathOptionType.POST_LOAD);
+    public DropViewStartWith(ShortestPathOptionType shortestPathOptionType, String prefix) {
+        super(shortestPathOptionType);
         this.prefix = prefix;
     }
 
