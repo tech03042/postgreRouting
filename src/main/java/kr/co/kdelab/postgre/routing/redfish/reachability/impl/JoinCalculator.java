@@ -3,7 +3,6 @@ package kr.co.kdelab.postgre.routing.redfish.reachability.impl;
 import kr.co.kdelab.postgre.routing.redfish.reachability.RechabliltyCalculator;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -11,33 +10,21 @@ import java.sql.Statement;
 
 public class JoinCalculator extends RechabliltyCalculator {
     private JDBConnectionInfo jdbConnectionInfo;
-    private PreparedStatement joinRB;
 
 
     public JoinCalculator(JDBConnectionInfo jdbConnectionInfo) throws SQLException {
         super(jdbConnectionInfo.createConnection());
         this.jdbConnectionInfo = jdbConnectionInfo;
 
-        buildRechabilitySql(getConnection());
-        buildSql(getConnection());
-
     }
 
-    class Division extends Thread {
-        private int source, target;
-        private boolean isForward;
 
-        private JoinCalculatorThreadState state = JoinCalculatorThreadState.PREPARE;
-
-
-        Division(int source, int target, boolean isForward) {
+    class Forward extends Division {
+        Forward(int source, int target) {
             this.source = source;
             this.target = target;
-            this.isForward = isForward;
-
         }
 
-        @SuppressWarnings("all")
         @Override
         public void run() {
             super.run();
@@ -45,25 +32,92 @@ public class JoinCalculator extends RechabliltyCalculator {
             try (Connection connection = jdbConnectionInfo.createConnection()) {
                 try (Statement statement = connection.createStatement()) {
                     state = JoinCalculatorThreadState.RUNNING;
-                    statement.execute("SELECT 1 FROM joinCalcFunction(" + source + ", " + target + ", " + String.valueOf(isForward) + ")");
-                } catch (SQLException e) {
-                    state = JoinCalculatorThreadState.ERROR;
-                    e.printStackTrace();
-                    return;
+                    statement.execute("DROP TABLE IF EXISTS visited_f; CREATE UNLOGGED TABLE visited_f(nid int, p2s int, PRIMARY KEY (nid, p2s));");
+                    statement.execute("DROP TABLE IF EXISTS expandTarget_f; CREATE UNLOGGED TABLE expandTarget_f(nid int primary key );");
+                    statement.execute("INSERT INTO visited_f(nid, p2s) VALUES (" + source + "," + source + ")");
+                    statement.execute("INSERT INTO expandTarget_f(nid) VALUES (" + source + ")");
+
+                    try (PreparedStatement expander = connection.prepareStatement("WITH expandTargetReset AS (DELETE FROM expandTarget_f\n" +
+                            "RETURNING nid),\n" +
+                            "     findNewTarget AS (INSERT INTO visited_f (nid, p2s)\n" +
+                            "  SELECT te.tid, te.fid\n" +
+                            "  FROM te,\n" +
+                            "       expandTargetReset\n" +
+                            "  WHERE expandTargetReset.nid = te.fid\n" +
+                            "ON CONFLICT do nothing\n" +
+                            "RETURNING nid)\n" +
+                            "INSERT INTO expandTarget_f (nid)\n" +
+                            "SELECT nid\n" +
+                            "FROM findNewTarget\n" +
+                            "WHERE findNewTarget.nid <> " + source + "\n" +
+                            "  and findNewTarget.nid <> " + target + "\n" +
+                            "ON CONFLICT DO NOTHING;")) {
+                        while (expander.executeUpdate() != 0) ;
+                    }
+                    statement.execute("DROP TABLE IF EXISTS expandTarget_f;");
+                    state = JoinCalculatorThreadState.SUCCESS;
                 }
-                state = JoinCalculatorThreadState.SUCCESS;
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 state = JoinCalculatorThreadState.ERROR;
-                e.printStackTrace();
             }
         }
+    }
+
+    class Backward extends Division {
+        Backward(int source, int target) {
+            this.source = source;
+            this.target = target;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+
+            try (Connection connection = jdbConnectionInfo.createConnection()) {
+                try (Statement statement = connection.createStatement()) {
+                    state = JoinCalculatorThreadState.RUNNING;
+                    statement.execute("DROP TABLE IF EXISTS visited_b; CREATE UNLOGGED TABLE visited_b(nid int, p2s int, PRIMARY KEY (nid, p2s));");
+                    statement.execute("DROP TABLE IF EXISTS expandTarget_b; CREATE UNLOGGED TABLE expandTarget_b(nid int primary key );");
+                    statement.execute("INSERT INTO visited_b(nid, p2s) VALUES (" + target + "," + target + ")");
+                    statement.execute("INSERT INTO expandTarget_b(nid) VALUES (" + target + ")");
+
+                    try (PreparedStatement expander = connection.prepareStatement("WITH expandTargetReset AS (DELETE FROM expandTarget_b\n" +
+                            "RETURNING nid),\n" +
+                            "     findNewTarget AS (INSERT INTO visited_b (nid, p2s)\n" +
+                            "  SELECT te.fid, te.tid -- tid, fid\n" +
+                            "  FROM te,\n" +
+                            "       expandTargetReset\n" +
+                            "  WHERE expandTargetReset.nid = te.tid -- fid\n" +
+                            "ON CONFLICT do nothing\n" +
+                            "RETURNING nid)\n" +
+                            "INSERT INTO expandTarget_b (nid)\n" +
+                            "SELECT nid\n" +
+                            "FROM findNewTarget\n" +
+                            "WHERE findNewTarget.nid <> " + source + "\n" +
+                            "  and findNewTarget.nid <> " + target + "\n" +
+                            "ON CONFLICT DO NOTHING;")) {
+                        while (expander.executeUpdate() != 0) ;
+                    }
+                    statement.execute("DROP TABLE IF EXISTS expandTarget_b;");
+                    state = JoinCalculatorThreadState.SUCCESS;
+                }
+            } catch (Exception e) {
+                state = JoinCalculatorThreadState.ERROR;
+            }
+        }
+    }
+
+
+    class Division extends Thread {
+        int source, target;
+        JoinCalculatorThreadState state = JoinCalculatorThreadState.PREPARE;
     }
 
 
     @Override
     public boolean calc(int source, int target) {
         try {
-            Division divisions[] = new Division[]{new Division(source, target, true), new Division(source, target, false)};
+            Division divisions[] = new Division[]{new Forward(source, target), new Backward(source, target)};
             for (Division division : divisions)
                 division.start();
             while (divisions[0].state != JoinCalculatorThreadState.SUCCESS && divisions[1].state != JoinCalculatorThreadState.SUCCESS) {
@@ -73,128 +127,14 @@ public class JoinCalculator extends RechabliltyCalculator {
                 Thread.sleep(10);
             }
 
-            joinRB.execute();
+            try (Statement statement = getConnection().createStatement()) {
+                statement.execute("DROP TABLE IF EXISTS rb; CREATE UNLOGGED TABLE rb(nid int primary key); " +
+                        "insert into rb(nid) select distinct visited_f.nid FROM visited_f, visited_b WHERE visited_f.nid=visited_b.nid;" +
+                        "DROP TABLE IF EXISTS visited_f; DROP TABLE IF EXISTS visited_b;");
+            }
         } catch (Exception e) {
             return false;
         }
         return true;
-    }
-
-    @SuppressWarnings("all")
-    private void buildSql(Connection connection) throws SQLException {
-        joinRB = newPreparedStatement(connection.prepareStatement("DROP TABLE IF EXISTS rb; CREATE UNLOGGED TABLE rb AS SELECT DISTINCT rb_f.nid FROM rb_f, rb_b WHERE rb_f.nid = rb_b.nid"));
-    }
-
-    @SuppressWarnings("all")
-    private void buildRechabilitySql(Connection connection) throws SQLException {
-        try (Statement statement = connection.createStatement()) {
-
-            statement.execute("DROP FUNCTION IF EXISTS joinCalcFunction( integer, integer, bool );\n" +
-                    "\n" +
-                    "-- 시작점, 도착점, (Forward: true,Backward: false) 구분\n" +
-                    "CREATE FUNCTION joinCalcFunction(start integer, target integer, isForward bool)\n" +
-                    "  RETURNS BOOLEAN\n" +
-                    "AS $$\n" +
-                    "DECLARE\n" +
-                    "  affected integer;\n" +
-                    "BEGIN\n" +
-                    "  CREATE temp table visited (\n" +
-                    "    nid int,\n" +
-                    "    p2s int,\n" +
-                    "    PRIMARY KEY (nid, p2s)\n" +
-                    "  ) ON COMMIT DROP;\n" +
-                    "  CREATE TEMP TABLE expandTarget (\n" +
-                    "    nid int PRIMARY KEY\n" +
-                    "  )\n" +
-                    "  ON COMMIT DROP;\n" +
-                    "\n" +
-                    "  IF isForward -- Forward 는 시작 기준, Backward 는 도착 기준\n" +
-                    "  THEN\n" +
-                    "    INSERT INTO visited(nid, p2s) VALUES (start, start);\n" +
-                    "    INSERT INTO expandTarget (nid) VALUES (start);\n" +
-                    "  ELSE\n" +
-                    "    INSERT INTO visited (nid, p2s) VALUES (target, target);\n" +
-                    "    INSERT INTO expandTarget (nid) VALUES (target);\n" +
-                    "  END IF;\n" +
-                    "\n" +
-                    "  LOOP\n" +
-                    "    IF isForward -- Forward, Backward 분기\n" +
-                    "    THEN\n" +
-                    "      WITH expandTargetReset AS (\n" +
-                    "        DELETE FROM expandTarget\n" +
-                    "        RETURNING nid),\n" +
-                    "          findNewTarget AS (\n" +
-                    "          INSERT INTO visited (nid, p2s)\n" +
-                    "            SELECT\n" +
-                    "              te.tid,\n" +
-                    "              te.fid\n" +
-                    "            FROM te, expandTargetReset\n" +
-                    "            WHERE expandTargetReset.nid = te.fid\n" +
-                    "          ON CONFLICT do nothing\n" +
-                    "          RETURNING nid )\n" +
-                    "      INSERT INTO expandTarget (nid)\n" +
-                    "        SELECT nid\n" +
-                    "        FROM findNewTarget\n" +
-                    "        WHERE\n" +
-                    "          findNewTarget.nid <> target and findNewTarget.nid <> start\n" +
-                    "      ON CONFLICT DO NOTHING;\n" +
-                    "    ELSE\n" +
-                    "      WITH expandTargetReset AS (\n" +
-                    "        DELETE FROM expandTarget\n" +
-                    "        RETURNING nid),\n" +
-                    "          findNewTarget AS (\n" +
-                    "          INSERT INTO visited (nid, p2s)\n" +
-                    "            SELECT\n" +
-                    "              te.fid,\n" +
-                    "              te.tid -- tid, fid\n" +
-                    "            FROM te, expandTargetReset\n" +
-                    "            WHERE expandTargetReset.nid = te.tid -- fid\n" +
-                    "          ON CONFLICT do nothing\n" +
-                    "          RETURNING nid )\n" +
-                    "      INSERT INTO expandTarget (nid)\n" +
-                    "        SELECT nid\n" +
-                    "        FROM findNewTarget\n" +
-                    "        WHERE\n" +
-                    "          findNewTarget.nid <> target and findNewTarget.nid <> start\n" +
-                    "      ON CONFLICT DO NOTHING;\n" +
-                    "    END IF;\n" +
-                    "\n" +
-                    "    GET DIAGNOSTICS affected = ROW_COUNT;\n" +
-                    "\n" +
-                    "    IF affected < 1\n" +
-                    "    THEN\n" +
-                    "      EXIT;\n" +
-                    "    END IF;\n" +
-                    "  END LOOP;\n" +
-                    "\n" +
-                    "  IF isForward\n" +
-                    "  THEN\n" +
-                    "    DROP TABLE IF EXISTS rb_f;\n" +
-                    "    CREATE UNLOGGED TABLE rb_f  AS\n" +
-                    "      SELECT DISTINCT nid\n" +
-                    "      FROM visited;\n" +
-                    "  ELSE\n" +
-                    "    DROP TABLE IF EXISTS rb_b;\n" +
-                    "    CREATE UNLOGGED TABLE rb_b AS\n" +
-                    "      SELECT DISTINCT nid\n" +
-                    "      FROM visited;\n" +
-                    "  end if;\n" +
-                    "  RETURN TRUE;\n" +
-                    "END;\n" +
-                    "$$\n" +
-                    "LANGUAGE plpgsql;\n");
-        }
-    }
-
-    @Override
-    public void close() throws IOException {
-        Statement statement = getCloseStatement();
-        try {
-            statement.execute("DROP FUNCTION IF EXISTS joinCalcFunction(integer, integer, bool);");
-        } catch (SQLException e) {
-            throw new IOException(e.getMessage(), e.getCause());
-        }
-
-        super.close(); // Must on bottom
     }
 }
