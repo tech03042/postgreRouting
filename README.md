@@ -91,6 +91,7 @@ try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, tru
 }
 ```
 5-1. Seo, implemented. RBFS
+- prepareDataSet
 ```java
 try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
     shortestPathBuilder.Option(new TETableClear())
@@ -99,7 +100,7 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
     shortestPathBuilder.prepare();
 }
 ```
-
+- shortestPath
 ```java
 try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
     shortestPathBuilder
