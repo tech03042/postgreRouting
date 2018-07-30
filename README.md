@@ -42,7 +42,7 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
 try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
         shortestPathBuilder.Option(new TETableClear()); // DataSet Table-1
         shortestPathBuilder.Option(new TEViewClear()); // DataSet Table Clear-2
-        shortestPathBuilder.Option(new PartitioningImporter(dataSet, pts, pv, true)); // Create DataSet Table
+        shortestPathBuilder.Option(new PartitioningImporter(dataSet, pts, pv)); // Create DataSet Table
         // bi-directional restrictive BFS must use PartitioningImporter
 
         shortestPathBuilder
@@ -60,7 +60,7 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
 try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
         shortestPathBuilder.Option(new TETableClear())
                 .Option(new TEViewClear())
-                .Option(new NormalImporter(dataSet)) // PartitioningImporter(dataSet, pts, pv, requireFullTe)
+                .Option(new NormalImporter(dataSet)) // PartitioningImporter(dataSet, pts, pv)
         shortestPathBuilder.prepare();
 }
 ```
@@ -95,7 +95,7 @@ try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, tru
 try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
     shortestPathBuilder.Option(new TETableClear())
             .Option(new TEViewClear())
-            .Option(new CustomImporter(dataSet, pts, pv, true));
+            .Option(new CustomImporter(dataSet, pts, pv));
     shortestPathBuilder.prepare();
 }
 ```
@@ -117,3 +117,4 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
 - 잘못된 지우기 쿼리 수정 ( 180728 )
 - pgPL/SQL -> 개별적인 쿼리로 수정 ( 180728 )
 - BDThread(NY, 13576 => 245646) 28988 ms(R)+7080 ms (R), 58754 ms (N)
+- PartitioningApplier TE 테이블을 기본으로 생성하도록 변경
