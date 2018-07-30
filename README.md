@@ -59,7 +59,7 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
 try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
         shortestPathBuilder.Option(new TETableClear())
                 .Option(new TEViewClear())
-                .Option(new NormalImporter(dataSet))
+                .Option(new NormalImporter(dataSet)) // PartitioningImporter(dataSet, pts, pv, requireFullTe)
         shortestPathBuilder.prepare();
 }
 ```
