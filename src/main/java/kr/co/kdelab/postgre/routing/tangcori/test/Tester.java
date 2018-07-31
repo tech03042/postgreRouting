@@ -57,14 +57,14 @@ public class Tester {
 
         //        filename = "./resources/papergraph.txt";
 //        filename = "./resources/random_1000_10000_1.txt";
-//        filename = "./resources/random_5000_50000_10.txt";
+          filename = "./resources/random_5000_50000_10.txt";
 //        filename = "./resources/USA-road-t.NY.gr";
 //        filename = "./resources/USA-road-t.W.gr"; // 17m
 //        filename = "./resources/USA-road-t.COL.gr";
 //        filename = "./resources/USA-road-t.FLA.gr"; // 1m 18s
 //        filename = "./resources/USA-road-t.USA.gr";
 //        filename = "./resources/directed_50000.txt";
-        filename = "./resources/yago.yago";
+//        filename = "./resources/yago.yago";
 
         switch (filename) {
             case "./resources/papergraph.txt":
@@ -111,11 +111,12 @@ public class Tester {
         }
         dataPrepare(jdbConnectionInfo, filename, pts, pv);
 
-        long t_reaching = System.currentTimeMillis();
+        long t_reaching_start = System.currentTimeMillis();
         try (Submit1Calculator joinCalculator = new Submit1Calculator(jdbConnectionInfo, true)) {
             joinCalculator.calc(source, target);
         }
-        System.out.println(System.currentTimeMillis() - t_reaching);
+
+        long t_reaching=System.currentTimeMillis() - t_reaching_start;
 
         try (FileWriter logFile = new FileWriter("log/log_runner_test.txt", true)) {
             RunningResult runningResult;
