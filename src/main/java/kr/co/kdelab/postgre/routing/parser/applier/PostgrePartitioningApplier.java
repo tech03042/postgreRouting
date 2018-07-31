@@ -8,7 +8,7 @@ import java.sql.Statement;
 
 public class PostgrePartitioningApplier extends TableApplier {
 
-    private int builderBufferSize = 40000000;
+    private int builderBufferSize = 20000000;
     private int pts, pv;
 
     public PostgrePartitioningApplier(int pts, int pv) {
@@ -56,6 +56,7 @@ public class PostgrePartitioningApplier extends TableApplier {
 
             for (int i = 0; i < pts; i++) {
                 long min = pv * i, max = pv * (i + 1);
+                statement.execute("DROP TABLE IF EXISTS TE" + i + " CASCADE");
                 statement.execute("CREATE UNLOGGED TABLE TE" + i + "(fid int, tid int, cost int, PRIMARY KEY (fid, tid))");
                 statement.execute("INSERT INTO TE" + i + "(fid, tid, cost) SELECT fid, tid, cost FROM te WHERE cost >= " + min + " AND cost <=" + max + " ON CONFLICT DO NOTHING ");
             }
