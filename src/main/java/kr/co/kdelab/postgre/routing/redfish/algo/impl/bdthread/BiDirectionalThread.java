@@ -69,22 +69,22 @@ public class BiDirectionalThread extends ShortestPathRunner implements Bidirecti
             case THREAD_USE_RB:
                 threads = new BDThreadChild[]{
                         new ReachedBDThreadChild(getJdbConnectionInfo(), "TA", "TE"),
-                        new ReachedBDThreadChild(getJdbConnectionInfo(), "TA2", "TE2")};
+                        new ReachedBDThreadChild(getJdbConnectionInfo(), "TA2", "TE_B")};
                 break;
             case THREAD_USE_TA_INDEX:
                 threads = new BDThreadChild[]{
                         new TaIndexedThreadChild(getJdbConnectionInfo(), "TA", "TE"),
-                        new TaIndexedThreadChild(getJdbConnectionInfo(), "TA2", "TE2")};
+                        new TaIndexedThreadChild(getJdbConnectionInfo(), "TA2", "TE_B")};
                 break;
             case THREAD_USE_RB_TA_INDEX:
                 threads = new BDThreadChild[]{
                         new ReachedTaIndexedThreadChild(getJdbConnectionInfo(), "TA", "TE"),
-                        new ReachedTaIndexedThreadChild(getJdbConnectionInfo(), "TA2", "TE2")};
+                        new ReachedTaIndexedThreadChild(getJdbConnectionInfo(), "TA2", "TE_B")};
                 break;
             default:
                 threads = new BDThreadChild[]{
                         new NormalBDThreadChild(getJdbConnectionInfo(), "TA", "TE"),
-                        new NormalBDThreadChild(getJdbConnectionInfo(), "TA2", "TE2")};
+                        new NormalBDThreadChild(getJdbConnectionInfo(), "TA2", "TE_B")};
         }
         for (BDThreadChild threadParent : threads)
             threadParent.start();

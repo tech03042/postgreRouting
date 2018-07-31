@@ -35,14 +35,7 @@ public class ReachedBiRbfs extends ShortestPathRunner implements BidirectionImpl
         minD2SOverlapStmt[FORWARD] = addPreparedStatement(getConnection().prepareStatement("SELECT MIN(TA0.D2S+TA1.D2S) FROM TA0, TA1 WHERE TA0.fwd=? and TA0.nid = TA1.nid")); // Optimization
         minD2SOverlapStmt[BACKWARD] = addPreparedStatement(getConnection().prepareStatement("SELECT MIN(TA0.D2S+TA1.D2S) FROM TA0, TA1 WHERE TA1.fwd=? and TA0.nid = TA1.nid")); // Optimization
 
-
-        StringBuilder unionTe = new StringBuilder("(SELECT * FROM te0");
-        for (int i = 0; i < pts; i++) {
-            unionTe.append(" UNION SELECT * FROM te").append(i);
-        }
-        unionTe.append(") as TE ");
-
-        verificationStmt = addPreparedStatement(getConnection().prepareStatement("SELECT MIN(TA0.D2S+TE.COST+TA1.D2S) FROM TA0, TA1, " + unionTe.toString() + "WHERE TA0.nid=TE.fid and TA1.nid=TE.tid"));
+        verificationStmt = addPreparedStatement(getConnection().prepareStatement("SELECT MIN(TA0.D2S+TE.COST+TA1.D2S) FROM TA0, TA1, TE WHERE TA0.nid=TE.fid and TA1.nid=TE.tid"));
         getMidNodeStmt = addPreparedStatement(getConnection().prepareStatement("SELECT TA0.nid from TA0, TA1 WHERE TA0.nid=TA1.nid and TA0.d2s+TA1.d2s = ?"));
     }
 
@@ -122,7 +115,7 @@ public class ReachedBiRbfs extends ShortestPathRunner implements BidirectionImpl
                         "from ("
                 , ") as ER(id, p2s, d2s)) as tmp, rb WHERE rownum=1 and tmp.nid = rb.nid) ON CONFLICT(nid) DO UPDATE SET d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd where " + taTableName + ".d2s>excluded.d2s"};
         final String[] sqlPrebuilt = {
-                "select TE." + joinColumnReverse + ", TE." + joinColumn + ", TF.D2S+TE.COST FROM " + taTableName + " as TF, te",
+                "select TE." + joinColumnReverse + ", TE." + joinColumn + ", TF.D2S+TE.COST FROM " + taTableName + " as TF, te_",
                 " as TE WHERE TF.fwd=",
                 " and TF.nid=TE." + joinColumn + " and TF.D2S+TE.cost<" + costExpression //  and TF.nid=TE.fid and TF.D2S+TE.cost<
         };

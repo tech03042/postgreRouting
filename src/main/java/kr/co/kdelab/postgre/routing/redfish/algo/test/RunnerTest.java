@@ -169,11 +169,11 @@ public class RunnerTest {
         }
     }
 
-    public static void dataPrepare(JDBConnectionInfo jdbConnectionInfo, String dataSet) throws Exception {
+    public static void dataPrepare(JDBConnectionInfo jdbConnectionInfo, String dataSet, int pts, int pv) throws Exception {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
             shortestPathBuilder.Option(new TETableClear())
                     .Option(new TEViewClear())
-                    .Option(new NormalImporter(dataSet))
+                    .Option(new PartitioningImporter(dataSet, pts, pv))
                     // Build TE TABLE
                     .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
                     // TA Clear
@@ -187,18 +187,18 @@ public class RunnerTest {
     public static void main(String[] args) throws Exception {
 
         JDBConnectionInfo jdbConnectionInfo = new JDBConnectionInfo("jdbc:postgresql://localhost:5432/kdelab",
-                "postgres", "icdwvb4j", "kdelab");
+                "postgres", "password", "kdelab");
 
 
         // logFile이 NULL 이 아니면 해당 파일을 Console Output으로 대체함.
-//        int pts = 40;
-//        int pv = 2500;
+        int pts = 40;
+        int pv = 2500;
         // NY
 
 
-        int pts = 75;
-        int pv = 7500;
-        //FLA
+//        int pts = 75;
+//        int pv = 7500;
+//        //FLA
 
         int source = 0;
         int target = 0;
@@ -207,9 +207,9 @@ public class RunnerTest {
         //        filename = "./resources/papergraph.txt";
 //        filename = "./resources/random_1000_10000_1.txt";
 //        filename = "./resources/random_5000_50000_10.txt";
-//        filename = "./resources/USA-road-t.NY.gr";
+        filename = "./resources/USA-road-t.NY.gr";
 //        filename = "./resources/USA-road-t.W.gr"; // 17m
-        filename = "./resources/USA-road-t.COL.gr";
+//        filename = "./resources/USA-road-t.COL.gr";
 //        filename = "./resources/USA-road-t.FLA.gr"; // 1m 18s
 //        filename = "./resources/USA-road-t.USA.gr";
 //        filename = "./resources/directed_50000.txt";
@@ -279,13 +279,18 @@ public class RunnerTest {
 //        if (1 == 1)
 //            return;
 //        DLog.use = true;
+        dataPrepare(jdbConnectionInfo, filename, pts, pv);
+        //Sleep....
+        Thread.sleep(3000);
+        System.out.println("INSERT DONE");
+
         try (FileWriter logFile = new FileWriter("log/log_runner_test.txt", true)) {
             RunningResult runningResult;
 //
-//            runningResult = birbfs(jdbConnectionInfo, false, filename, pts, pv, source, target);
-//            // BI-R BFS
-//            System.out.println(runningResult);
-//            logFile.append(runningResult.toString(filename)).append("\n");
+            runningResult = birbfs(jdbConnectionInfo, true, filename, pts, pv, source, target);
+            // BI-R BFS
+            System.out.println(runningResult);
+            logFile.append(runningResult.toString(filename)).append("\n");
 ////
 ////
 //            runningResult = birbfsReached(jdbConnectionInfo, true, filename, pts, pv, source, target);
@@ -295,17 +300,17 @@ public class RunnerTest {
 //
 //
 
-            runningResult = bdThreadReached(jdbConnectionInfo, true, filename, source, target);
+            runningResult = bdThread(jdbConnectionInfo, true, filename, source, target);
             // 그냥 BD Thread
 
             System.out.println(runningResult);
             logFile.append(runningResult.toString(filename)).append("\n");
-
-            runningResult = bdThread(jdbConnectionInfo, true, filename, source, target);
-            // TA 테이블 인덱스 버전
-
-            System.out.println(runningResult);
-            logFile.append(runningResult.toString(filename)).append("\n");
+//
+//            runningResult = bdThread(jdbConnectionInfo, true, filename, source, target);
+//            // TA 테이블 인덱스 버전
+//
+//            System.out.println(runningResult);
+//            logFile.append(runningResult.toString(filename)).append("\n");
 
 //            filename = "./resources/reach_test.txt";
 //            dataPrepare(jdbConnectionInfo, filename);

@@ -34,7 +34,7 @@ public class BiDirection extends ShortestPathRunner implements BidirectionImpl {
                         "DO UPDATE SET  d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd,f=excluded.f " +
                         "WHERE ta.d2s>excluded.d2s"));
         stmtERMergeOP[BACKWARD] = addPreparedStatement(
-                getConnection().prepareStatement("INSERT INTO ta2(nid, d2s, p2s, fwd, f) (SELECT tid as nid, cost+? as d2s, ? as p2s, ? as fwd, false as f FROM TE2 WHERE fid=?) ON CONFLICT(nid)" +
+                getConnection().prepareStatement("INSERT INTO ta2(nid, d2s, p2s, fwd, f) (SELECT tid as nid, cost+? as d2s, ? as p2s, ? as fwd, false as f FROM TE_B WHERE fid=?) ON CONFLICT(nid)" +
                         "DO UPDATE SET  d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd,f=excluded.f " +
                         "WHERE ta2.d2s>excluded.d2s"));
 

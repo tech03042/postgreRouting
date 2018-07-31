@@ -56,9 +56,9 @@ public class PostgrePartitioningApplier extends TableApplier {
 
             for (int i = 0; i < pts; i++) {
                 long min = pv * i, max = pv * (i + 1);
-                statement.execute("DROP TABLE IF EXISTS TE" + i + " CASCADE");
-                statement.execute("CREATE UNLOGGED TABLE TE" + i + "(fid int, tid int, cost int, PRIMARY KEY (fid, tid))");
-                statement.execute("INSERT INTO TE" + i + "(fid, tid, cost) SELECT fid, tid, cost FROM te WHERE cost >= " + min + " AND cost <=" + max + " ON CONFLICT DO NOTHING ");
+                statement.execute("DROP TABLE IF EXISTS TE_" + i + " CASCADE");
+                statement.execute("CREATE UNLOGGED TABLE TE_" + i + "(fid int, tid int, cost int, PRIMARY KEY (fid, tid))");
+                statement.execute("INSERT INTO TE_" + i + "(fid, tid, cost) SELECT fid, tid, cost FROM te WHERE cost >= " + min + " AND cost <=" + max + " ON CONFLICT DO NOTHING ");
                 connection.commit();
             }
         }
