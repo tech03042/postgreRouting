@@ -12,14 +12,12 @@ import java.sql.Statement;
 
 public class RechabilityCalculator implements Closeable {
     private Connection connection;
-    private Statement statement;
     private PreparedStatementArray preparedStatements = new PreparedStatementArray();
     // PreparedStatement -> Array -> Close
 
 
     public RechabilityCalculator(Connection connection) throws SQLException {
         this.connection = connection;
-        statement = connection.createStatement();
     }
 
     public Connection getConnection() {
@@ -35,12 +33,12 @@ public class RechabilityCalculator implements Closeable {
         return null;
     }
 
-    protected Statement getCloseStatement() {
-        return statement;
+    public void clear() {
+        preparedStatements.closeAll();
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         preparedStatements.closeAll();
         try {
             connection.close();

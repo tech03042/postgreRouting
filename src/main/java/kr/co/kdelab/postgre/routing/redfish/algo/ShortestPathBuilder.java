@@ -5,6 +5,9 @@ import kr.co.kdelab.postgre.routing.redfish.algo.dataclass.PointArray;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResult;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResultArray;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResultError;
+import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResultSuccess;
+import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.RechabilityImporter;
+import kr.co.kdelab.postgre.routing.redfish.reachability.dataclass.RechabilityResult;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 
 import java.io.Closeable;
@@ -46,12 +49,16 @@ public class ShortestPathBuilder implements Closeable {
     }
 
     public RunningResult run(int source, int target) throws Exception {
-
+        RechabilityResult rechabilityResult = null;
         for (ShortestPathOption shortestPathOption : shortestPathRunningOptions[0]) {
             DLog.debug("run-prepare-start", shortestPathOption.getClass().toString());
+            shortestPathOption.setSource(source);
+            shortestPathOption.setTarget(target);
             shortestPathOption.run(jdbConnectionInfo);
             DLog.debug("run-prepare-end", shortestPathOption.getClass().toString());
 
+            if (shortestPathOption instanceof RechabilityImporter)
+                rechabilityResult = ((RechabilityImporter) shortestPathOption).getRechabilityResult();
         }
 
 
@@ -70,6 +77,9 @@ public class ShortestPathBuilder implements Closeable {
             DLog.debug("run-clean-end", shortestPathOption.getClass().toString());
         }
 
+        if (runningResult instanceof RunningResultSuccess) {
+            ((RunningResultSuccess) runningResult).setRechabilityResult(rechabilityResult);
+        }
         return runningResult;
     }
 
@@ -121,6 +131,20 @@ public class ShortestPathBuilder implements Closeable {
             } catch (Exception e) {
                 throw new IOException(e.getMessage());
             }
+        }
+
+        for (ShortestPathOption shortestPathOption : shortestPathOptions[0]) {
+            shortestPathOption.close();
+        }
+        for (ShortestPathOption shortestPathOption : shortestPathOptions[1]) {
+            shortestPathOption.close();
+        }
+
+        for (ShortestPathOption shortestPathOption : shortestPathRunningOptions[0]) {
+            shortestPathOption.close();
+        }
+        for (ShortestPathOption shortestPathOption : shortestPathRunningOptions[1]) {
+            shortestPathOption.close();
         }
     }
 }

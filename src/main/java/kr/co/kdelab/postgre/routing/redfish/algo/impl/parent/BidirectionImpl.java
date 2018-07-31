@@ -1,6 +1,6 @@
 package kr.co.kdelab.postgre.routing.redfish.algo.impl.parent;
 
-import kr.co.kdelab.postgre.routing.redfish.algo.util.JDBCUtil;
+import kr.co.kdelab.postgre.routing.DBUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,26 +15,21 @@ public interface BidirectionImpl {
     int BACKWARD = 1;
 
     default long getMinCost(PreparedStatement statement) throws SQLException {
-        try (ResultSet rs = statement.executeQuery()) {
-            long value = JDBCUtil.getLong(rs);
-//            System.out.println(value);
-            if (value == 0)
-                return Long.MAX_VALUE;
-            return value;
-        }
+        long value = DBUtil.getOnceByLong(statement);
+        if (value == 0)
+            return Long.MAX_VALUE;
+        return value;
     }
 
 
     default long getMinCost(PreparedStatement[] stmtEquallyExpandedCost, int direction, int X, int Y) throws SQLException {
         stmtEquallyExpandedCost[direction].setInt(1, X);
         stmtEquallyExpandedCost[direction].setInt(2, Y);
-        try (ResultSet rs = stmtEquallyExpandedCost[direction].executeQuery()) {
-            long value = JDBCUtil.getLong(rs);
-            if (value == 0)
-                return Long.MAX_VALUE;
-            return value;
 
-        }
+        long value = DBUtil.getOnceByLong(stmtEquallyExpandedCost[direction]);
+        if (value == 0)
+            return Long.MAX_VALUE;
+        return value;
     }
 
 

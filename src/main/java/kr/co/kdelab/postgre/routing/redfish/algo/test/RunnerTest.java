@@ -10,13 +10,14 @@ import kr.co.kdelab.postgre.routing.redfish.algo.impl.rbfs.BiRbfs;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.rbfs.ReachedBiRbfs;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.rbfs.options.PrepareBiRbfs;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.*;
+import kr.co.kdelab.postgre.routing.redfish.reachability.impl.Submit1Calculator;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 
 import java.io.FileWriter;
 
 public class RunnerTest {
 
-    public static RunningResult birbfs(JDBConnectionInfo jdbConnectionInfo, boolean remainTe, String dataSet, int pts, int pv, int source, int target) throws Exception {
+    private static RunningResult birbfs(JDBConnectionInfo jdbConnectionInfo, boolean remainTe, String dataSet, int pts, int pv, int source, int target) throws Exception {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
 
             if (!remainTe)
@@ -38,7 +39,7 @@ public class RunnerTest {
         }
     }
 
-    public static RunningResult birbfsReached(JDBConnectionInfo jdbConnectionInfo, boolean remainTe, String dataSet, int pts, int pv, int source, int target) throws Exception {
+    private static RunningResult birbfsReached(JDBConnectionInfo jdbConnectionInfo, boolean remainTe, String dataSet, int pts, int pv, int source, int target) throws Exception {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
 
             if (!remainTe)
@@ -49,11 +50,15 @@ public class RunnerTest {
             if (!remainTe)
                 shortestPathBuilder.Option(new PartitioningImporter(dataSet, pts, pv));
 
+
+            boolean isDoubleUndirected = dataSet.endsWith(".gr");
+
             shortestPathBuilder
                     .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
                     // TA Clear
                     .Option(new PrepareBiRbfs())
                     // BD Thread Table Prepare
+                    .Option(new RechabilityImporter(new Submit1Calculator(jdbConnectionInfo, isDoubleUndirected)))
                     .Runner(new ReachedBiRbfs(pts, pv));
             shortestPathBuilder.prepare();
             return shortestPathBuilder.run(source, target);
@@ -76,7 +81,7 @@ public class RunnerTest {
         }
     }
 
-    public static RunningResult bdThread(JDBConnectionInfo jdbConnectionInfo, boolean remainTE, String dataSet, int source, int target) throws Exception {
+    private static RunningResult bdThread(JDBConnectionInfo jdbConnectionInfo, boolean remainTE, String dataSet, int source, int target) throws Exception {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
 
             if (!remainTE)
@@ -100,7 +105,7 @@ public class RunnerTest {
         }
     }
 
-    public static RunningResult bdThreadTaIndexed(JDBConnectionInfo jdbConnectionInfo, boolean remainTE, String dataSet, int source, int target) throws Exception {
+    private static RunningResult bdThreadTaIndexed(JDBConnectionInfo jdbConnectionInfo, boolean remainTE, String dataSet, int source, int target) throws Exception {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
 
             if (!remainTE)
@@ -123,7 +128,7 @@ public class RunnerTest {
         }
     }
 
-    public static RunningResult reachedBdThreadTaIndexed(JDBConnectionInfo jdbConnectionInfo, boolean remainTE, String dataSet, int source, int target) throws Exception {
+    private static RunningResult reachedBdThreadTaIndexed(JDBConnectionInfo jdbConnectionInfo, boolean remainTE, String dataSet, int source, int target) throws Exception {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
 
             if (!remainTE)
@@ -134,19 +139,22 @@ public class RunnerTest {
             if (!remainTE)
                 shortestPathBuilder.Option(new NormalImporter(dataSet));
 
+            boolean isDoubleUndirected = dataSet.endsWith(".gr");
+
             shortestPathBuilder
                     // Build TE TABLE
                     .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
                     // TA Clear
                     .Option(new PrepareBDThread(true))
                     // BD Thread Table Prepare
+                    .Option(new RechabilityImporter(new Submit1Calculator(jdbConnectionInfo, isDoubleUndirected)))
                     .Runner(new BiDirectionalThread(100, BiDirectionalThread.THREAD_USE_TA_INDEX | BiDirectionalThread.THREAD_USE_RB));
             shortestPathBuilder.prepare();
             return shortestPathBuilder.run(source, target);
         }
     }
 
-    public static RunningResult bdThreadReached(JDBConnectionInfo jdbConnectionInfo, boolean remainTE, String dataSet, int source, int target) throws Exception {
+    private static RunningResult bdThreadReached(JDBConnectionInfo jdbConnectionInfo, boolean remainTE, String dataSet, int source, int target) throws Exception {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
 
             if (!remainTE)
@@ -157,19 +165,22 @@ public class RunnerTest {
             if (!remainTE)
                 shortestPathBuilder.Option(new NormalImporter(dataSet));
 
+            boolean isDoubleUndirected = dataSet.endsWith(".gr");
+
             shortestPathBuilder
                     // Build TE TABLE
                     .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
                     // TA Clear
                     .Option(new PrepareBDThread(true))
                     // BD Thread Table Prepare
+                    .Option(new RechabilityImporter(new Submit1Calculator(jdbConnectionInfo, isDoubleUndirected)))
                     .Runner(new BiDirectionalThread(100, BiDirectionalThread.THREAD_USE_RB));
             shortestPathBuilder.prepare();
             return shortestPathBuilder.run(source, target);
         }
     }
 
-    public static void dataPrepare(JDBConnectionInfo jdbConnectionInfo, String dataSet, int pts, int pv) throws Exception {
+    private static void dataPrepare(JDBConnectionInfo jdbConnectionInfo, String dataSet, int pts, int pv) throws Exception {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
             shortestPathBuilder.Option(new TETableClear())
                     .Option(new TEViewClear())
@@ -252,68 +263,42 @@ public class RunnerTest {
                 target = 45774;
                 break;
         }
-//        remainTE TE 테이블 Drop 여부
-
-//        try (FileWriter logFile = new FileWriter("log/log_runner_test.txt", true)) {
-//            RunningResult runningResult = null;
-//
-//            runningResult = birbfs(jdbConnectionInfo, false, filename, pts, pv, source, target);
-//            // BI-R BFS
-//            System.out.println(runningResult);
-//            logFile.append(runningResult.toString(filename)).append("\n");
-//
-//            runningResult = bdThread(jdbConnectionInfo, false, filename, source, target);
-//            // 그냥 BD Thread
-//
-//            System.out.println(runningResult);
-//            logFile.append(runningResult.toString(filename)).append("\n");
-//
-//            runningResult = bdThreadTaIndexed(jdbConnectionInfo, false, filename, source, target);
-//            // TA 테이블 인덱스 버전
-//
-//            System.out.println(runningResult);
-//            logFile.append(runningResult.toString(filename)).append("\n");
-//        }
-//
-//        dataPrepare(jdbConnectionInfo, filename);
-//        if (1 == 1)
-//            return;
-//        DLog.use = true;
         dataPrepare(jdbConnectionInfo, filename, pts, pv);
-        //Sleep....
-        Thread.sleep(3000);
-        System.out.println("INSERT DONE");
+        System.out.println("Sleep after data insert");
+        Thread.sleep(10000);
+        System.out.println("Wake Up");
 
         try (FileWriter logFile = new FileWriter("log/log_runner_test.txt", true)) {
             RunningResult runningResult;
 //
             runningResult = birbfs(jdbConnectionInfo, true, filename, pts, pv, source, target);
-            // BI-R BFS
             System.out.println(runningResult);
             logFile.append(runningResult.toString(filename)).append("\n");
-////
-////
-//            runningResult = birbfsReached(jdbConnectionInfo, true, filename, pts, pv, source, target);
-//            // BI-R BFS
-//            System.out.println(runningResult);
-//            logFile.append(runningResult.toString(filename)).append("\n");
-//
-//
+
+
+            runningResult = birbfsReached(jdbConnectionInfo, true, filename, pts, pv, source, target);
+            System.out.println(runningResult);
+            logFile.append(runningResult.toString(filename)).append("\n");
+
 
             runningResult = bdThread(jdbConnectionInfo, true, filename, source, target);
-            // 그냥 BD Thread
-
             System.out.println(runningResult);
             logFile.append(runningResult.toString(filename)).append("\n");
-//
-//            runningResult = bdThread(jdbConnectionInfo, true, filename, source, target);
-//            // TA 테이블 인덱스 버전
-//
-//            System.out.println(runningResult);
-//            logFile.append(runningResult.toString(filename)).append("\n");
 
-//            filename = "./resources/reach_test.txt";
-//            dataPrepare(jdbConnectionInfo, filename);
+
+            runningResult = bdThreadReached(jdbConnectionInfo, true, filename, source, target);
+            System.out.println(runningResult);
+            logFile.append(runningResult.toString(filename)).append("\n");
+
+
+            runningResult = bdThreadTaIndexed(jdbConnectionInfo, true, filename, source, target);
+            System.out.println(runningResult);
+            logFile.append(runningResult.toString(filename)).append("\n");
+
+
+            runningResult = reachedBdThreadTaIndexed(jdbConnectionInfo, true, filename, source, target);
+            System.out.println(runningResult);
+            logFile.append(runningResult.toString(filename)).append("\n");
         }
     }
 
