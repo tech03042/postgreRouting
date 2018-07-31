@@ -3,15 +3,11 @@ package kr.co.kdelab.postgre.routing.tangcori.test;
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathBuilder;
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathOptionType;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResult;
-import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.ERClear;
-import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.TAClear;
-import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.TETableClear;
-import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.TEViewClear;
+import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.*;
 import kr.co.kdelab.postgre.routing.redfish.reachability.impl.Submit1Calculator;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 import kr.co.kdelab.postgre.routing.tangcori.impl.PrepareSeoRBFS;
 import kr.co.kdelab.postgre.routing.tangcori.impl.SeoRBFSRunnerReached;
-import kr.co.kdelab.postgre.routing.tangcori.util.CustomImporter;
 
 import java.io.FileWriter;
 
@@ -34,7 +30,7 @@ public class Tester {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
             shortestPathBuilder.Option(new TETableClear())
                     .Option(new TEViewClear())
-                    .Option(new CustomImporter(dataSet, pts, pv));
+                    .Option(new PartitioningImporter(dataSet, pts, pv));
             shortestPathBuilder.prepare();
         }
     }
@@ -67,7 +63,7 @@ public class Tester {
 //        filename = "./resources/USA-road-t.FLA.gr"; // 1m 18s
 //        filename = "./resources/USA-road-t.USA.gr";
 //        filename = "./resources/directed_50000.txt";
-          filename = "./resources/yago.yago";
+        filename = "./resources/yago.yago";
 
         switch (filename) {
             case "./resources/papergraph.txt":

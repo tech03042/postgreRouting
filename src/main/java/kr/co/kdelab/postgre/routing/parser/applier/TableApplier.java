@@ -6,18 +6,22 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public abstract class TableApplier {
-    protected TestSet testSetReader = null;
+    private TestSet testSetReader = null;
 
-    public TableApplier() {
+    TableApplier() {
 
     }
 
-    public TableApplier(TestSet testSet) {
+    TableApplier(TestSet testSet) {
         this.testSetReader = testSet;
     }
 
     public void setReader(TestSet testSetReader) {
         this.testSetReader = testSetReader;
+    }
+
+    public TestSet getReader() {
+        return testSetReader;
     }
 
     public abstract void applyInTable(Connection connection) throws SQLException;

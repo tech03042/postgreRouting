@@ -14,13 +14,14 @@ public class DefaultApplier extends TableApplier {
 
     @Override
     public void applyInTable(Connection connection) throws SQLException {
+        TestSet testSet = getReader();
         int batchCount = 0;
         connection.setAutoCommit(false);
 
 
         TestSetFormat dataPlaced = null;
         try (PreparedStatement insertPlaced = connection.prepareStatement("INSERT INTO TE(fid, tid, cost) VALUES(?, ?, ?)")) {
-            while ((dataPlaced = testSetReader.readLine()) != null) {
+            while ((dataPlaced = testSet.readLine()) != null) {
                 batchCount++;
 //                if (dataPlaced.getWeight() == 143)
 //                    System.out.println(dataPlaced.getWeight());

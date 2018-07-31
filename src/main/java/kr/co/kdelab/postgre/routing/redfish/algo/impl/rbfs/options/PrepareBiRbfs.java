@@ -18,9 +18,6 @@ public class PrepareBiRbfs extends ShortestPathOption {
             try (Statement statement = connection.createStatement()) {
                 statement.execute("CREATE UNLOGGED TABLE IF NOT EXISTS ta0(nid int PRIMARY KEY, d2s int, p2s int, fwd int); CREATE UNLOGGED TABLE IF NOT EXISTS ta1(nid int PRIMARY KEY, d2s int, p2s int, fwd int);");
 
-                statement.execute("CREATE INDEX IF NOT EXISTS TE_FID_IDX ON te USING hash(fid)");
-                statement.execute("CREATE INDEX IF NOT EXISTS TE_TID_IDX ON te USING hash(tid)");
-
                 statement.execute("TRUNCATE ta0; TRUNCATE ta1;");
             }
         }

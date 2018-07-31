@@ -187,7 +187,7 @@ public class RunnerTest {
     public static void main(String[] args) throws Exception {
 
         JDBConnectionInfo jdbConnectionInfo = new JDBConnectionInfo("jdbc:postgresql://localhost:5432/kdelab",
-                "postgres", "password", "kdelab");
+                "postgres", "icdwvb4j", "kdelab");
 
 
         // logFile이 NULL 이 아니면 해당 파일을 Console Output으로 대체함.

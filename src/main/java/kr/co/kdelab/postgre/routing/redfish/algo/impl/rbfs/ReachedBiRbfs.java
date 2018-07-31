@@ -101,7 +101,7 @@ public class ReachedBiRbfs extends ShortestPathRunner implements BidirectionImpl
 //        Definition 5: Extended E-operator.
         int affected;
         int l = Math.max(1, iteration - pts + 1); // l be max(1, i − pts + 1),
-        int idx = iteration - l;
+        int idx = iteration - l + 1;
         int costExpression = minCost - distanceReverse;
 //        int costExpression = minCost; // minCost - distReverse ... => some case make bug
 
@@ -124,9 +124,9 @@ public class ReachedBiRbfs extends ShortestPathRunner implements BidirectionImpl
         try (Statement statement = getConnection().createStatement()) {
             StringBuilder frontier = new StringBuilder();
             frontier.append(sqlPrebuilt[0]).append(idx--).append(sqlPrebuilt[1]).append(l++).append(sqlPrebuilt[2]);
-            while (idx > -1) {
+            while (idx > 0)
                 frontier.append(" union ").append(sqlPrebuilt[0]).append(idx--).append(sqlPrebuilt[1]).append(l++).append(sqlPrebuilt[2]);
-            }
+
 
 //            System.out.println(expandMergePrebuilt[0] + frontier + expandMergePrebuilt[1]);
             //System.out.println(frontier.toString());

@@ -356,10 +356,6 @@ public class RB {
             setting.execute("delete from tbRBCurrent");
 
 
-//			setting.execute(	"DROP TABLE IF EXISTS te" );
-//			setting.execute(	"CREATE UNLOGGED TABLE IF NOT EXISTS te AS "+ te_union );
-            setting.execute("CREATE INDEX IF NOT EXISTS teIndex on te (fid)");
-
             Statement initianlize = conn.createStatement();
             initianlize.executeUpdate("insert into tbRBCurrent(nid) values(" + source + ")");
             initianlize.executeUpdate("insert into rb_p2s(nid) values(" + target + "), " + "(" + source + ")");
