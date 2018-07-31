@@ -16,7 +16,7 @@ public class Submit1Calculator extends RechabliltyCalculator {
     }
 
     @Override
-    public boolean calc(int source, int target) {
+    public void calc(int source, int target) throws SQLException {
         PreparedStatement expander;
         PreparedStatement deleter;
 
@@ -111,10 +111,6 @@ public class Submit1Calculator extends RechabliltyCalculator {
             statement.execute("TRUNCATE TABLE rb;");
             statement.execute("  INSERT INTO rb (nid) SELECT distinct nid FROM visited;");
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
         }
-        return true;
     }
 }

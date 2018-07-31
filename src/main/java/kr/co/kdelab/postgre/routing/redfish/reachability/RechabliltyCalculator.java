@@ -30,8 +30,7 @@ public class RechabliltyCalculator implements Closeable {
         return preparedStatement;
     }
 
-    public boolean calc(int source, int target) throws SQLException {
-        return false;
+    public void calc(int source, int target) throws Exception {
     }
 
     protected Statement getCloseStatement() {

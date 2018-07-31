@@ -57,7 +57,7 @@ public class Tester {
 
         //        filename = "./resources/papergraph.txt";
 //        filename = "./resources/random_1000_10000_1.txt";
-          filename = "./resources/random_5000_50000_10.txt";
+        filename = "./resources/random_5000_50000_10.txt";
 //        filename = "./resources/USA-road-t.NY.gr";
 //        filename = "./resources/USA-road-t.W.gr"; // 17m
 //        filename = "./resources/USA-road-t.COL.gr";
@@ -116,7 +116,7 @@ public class Tester {
             joinCalculator.calc(source, target);
         }
 
-        long t_reaching=System.currentTimeMillis() - t_reaching_start;
+        long t_reaching = System.currentTimeMillis() - t_reaching_start;
 
         try (FileWriter logFile = new FileWriter("log/log_runner_test.txt", true)) {
             RunningResult runningResult;

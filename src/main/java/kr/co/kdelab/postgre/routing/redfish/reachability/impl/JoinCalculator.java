@@ -102,6 +102,7 @@ public class JoinCalculator extends RechabliltyCalculator {
                     state = JoinCalculatorThreadState.SUCCESS;
                 }
             } catch (Exception e) {
+                exception = e;
                 state = JoinCalculatorThreadState.ERROR;
             }
         }
@@ -109,32 +110,31 @@ public class JoinCalculator extends RechabliltyCalculator {
 
 
     class Division extends Thread {
+        Exception exception = null;
         int source, target;
         JoinCalculatorThreadState state = JoinCalculatorThreadState.PREPARE;
     }
 
 
     @Override
-    public boolean calc(int source, int target) {
-        try {
-            Division divisions[] = new Division[]{new Forward(source, target), new Backward(source, target)};
-            for (Division division : divisions)
-                division.start();
-            while (divisions[0].state != JoinCalculatorThreadState.SUCCESS && divisions[1].state != JoinCalculatorThreadState.SUCCESS) {
-                if (divisions[0].state == JoinCalculatorThreadState.ERROR || divisions[1].state == JoinCalculatorThreadState.ERROR) {
-                    return false;
-                }
-                Thread.sleep(10);
+    public void calc(int source, int target) throws Exception {
+        Division divisions[] = new Division[]{new Forward(source, target), new Backward(source, target)};
+        for (Division division : divisions)
+            division.start();
+        while (divisions[0].state != JoinCalculatorThreadState.SUCCESS && divisions[1].state != JoinCalculatorThreadState.SUCCESS) {
+            if (divisions[0].state == JoinCalculatorThreadState.ERROR || divisions[1].state == JoinCalculatorThreadState.ERROR) {
+                if (divisions[0].exception != null)
+                    throw divisions[0].exception;
+                else
+                    throw divisions[1].exception;
             }
-
-            try (Statement statement = getConnection().createStatement()) {
-                statement.execute("DROP TABLE IF EXISTS rb; CREATE UNLOGGED TABLE rb(nid int primary key); " +
-                        "insert into rb(nid) select distinct visited_f.nid FROM visited_f, visited_b WHERE visited_f.nid=visited_b.nid;" +
-                        "DROP TABLE IF EXISTS visited_f; DROP TABLE IF EXISTS visited_b;");
-            }
-        } catch (Exception e) {
-            return false;
+            Thread.sleep(10);
         }
-        return true;
+
+        try (Statement statement = getConnection().createStatement()) {
+            statement.execute("DROP TABLE IF EXISTS rb; CREATE UNLOGGED TABLE rb(nid int primary key); " +
+                    "insert into rb(nid) select distinct visited_f.nid FROM visited_f, visited_b WHERE visited_f.nid=visited_b.nid;" +
+                    "DROP TABLE IF EXISTS visited_f; DROP TABLE IF EXISTS visited_b;");
+        }
     }
 }

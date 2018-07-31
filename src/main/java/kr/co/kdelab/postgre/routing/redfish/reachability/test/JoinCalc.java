@@ -107,9 +107,8 @@ public class JoinCalc {
 
         long s = System.currentTimeMillis();
         try (JoinCalculator calculator = new JoinCalculator(new JDBConnectionInfo("jdbc:postgresql://localhost:5432/kdelab", "postgres", "icdwvb4j", "kdelab"))) {
-            if (calculator.calc(13113, 435663))
-                System.out.println("계산 끝");
-        } catch (SQLException | IOException e) {
+            calculator.calc(13113, 435663);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println(System.currentTimeMillis() - s);
