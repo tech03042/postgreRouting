@@ -68,12 +68,7 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
 ```java
 // after prepared DataSet Table ( FULL TE )
 try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
-        if (calculator.calc(13576, 245646))
-                System.out.println("Successed");
-        else
-                throw new IOException("Failed");
-} catch (SQLException | IOException | InterruptedException e) {
-        System.out.println("Error");
+        calculator.calc(13576, 245646);
 }
 
 ```
@@ -82,12 +77,7 @@ try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
 // after prepared DataSet Table ( FULL TE )
 // Submit1Calculator ( JDBConnectionInfo, doubleUndirected # USA_ROAD-TRUE )
 try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, true)) {
-        if (calculator.calc(13576, 245646))
-                System.out.println("Successed");
-        else
-                throw new IOException("Failed");
-} catch (SQLException | IOException | InterruptedException e) {
-        System.out.println("Error");
+        calculator.calc(13576, 245646);
 }
 ```
 5-1. Seo, implemented. RBFS

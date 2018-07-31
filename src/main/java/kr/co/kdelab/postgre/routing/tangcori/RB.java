@@ -444,7 +444,7 @@ public class RB {
 
     public static String joinR(JDBConnectionInfo jdbConnectionInfo, int source, int target) {
         try (JoinCalculator JCal = new JoinCalculator(jdbConnectionInfo);) {
-            System.out.println(JCal.calc(source, target));
+            JCal.calc(source, target);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -453,7 +453,7 @@ public class RB {
 
     public static String P_Basic(JDBConnectionInfo jdbConnectionInfo, int source, int target, boolean isUndirected) {
         try (RechabliltyCalculator JCal = new Submit1Calculator(jdbConnectionInfo, isUndirected)) {
-            System.out.println(JCal.calc(source, target));
+            JCal.calc(source, target);
         } catch (Exception e) {
             e.printStackTrace();
         }
