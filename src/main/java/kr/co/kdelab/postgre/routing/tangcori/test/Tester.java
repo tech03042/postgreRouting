@@ -5,6 +5,7 @@ import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathOptionType;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.ExpandableRunningResult;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResult;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.*;
+import kr.co.kdelab.postgre.routing.redfish.reachability.dataclass.RechabilityResult;
 import kr.co.kdelab.postgre.routing.redfish.reachability.impl.Submit1Calculator;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 import kr.co.kdelab.postgre.routing.tangcori.impl.PrepareSeoRBFS;
@@ -111,19 +112,18 @@ public class Tester {
         }
         dataPrepare(jdbConnectionInfo, filename, pts, pv);
 
-        long t_reaching_start = System.currentTimeMillis();
+        RechabilityResult rechabilityResult;
         try (Submit1Calculator joinCalculator = new Submit1Calculator(jdbConnectionInfo, true)) {
-            joinCalculator.calc(source, target);
+            rechabilityResult = joinCalculator.calc(source, target);
         }
 
-        long t_reaching = System.currentTimeMillis() - t_reaching_start;
 
         try (FileWriter logFile = new FileWriter("log/log_runner_test.txt", true)) {
             RunningResult runningResult;
             runningResult = SeoRBFS(jdbConnectionInfo, pts, pv, source, target);
 
             if (runningResult instanceof ExpandableRunningResult) {
-                ((ExpandableRunningResult) runningResult).writeCSV("log/test.csv", "TESTRB", filename, t_reaching);
+                ((ExpandableRunningResult) runningResult).writeCSV("log/test.csv", filename, rechabilityResult);
             } else {
                 System.out.println(runningResult);
                 logFile.append(runningResult.toString(filename)).append("\n");

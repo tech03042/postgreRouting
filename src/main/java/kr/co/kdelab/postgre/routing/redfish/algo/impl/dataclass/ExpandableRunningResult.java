@@ -5,6 +5,8 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+import kr.co.kdelab.postgre.routing.DBUtil;
+import kr.co.kdelab.postgre.routing.redfish.reachability.dataclass.RechabilityResult;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -254,18 +256,9 @@ public class ExpandableRunningResult extends RunningResult {
 
 
         try (Statement statement = connection.createStatement()) {
-            this.taCountF = getOnce(statement, "SELECT count(*) FROM ta");
-            this.taCountB = getOnce(statement, "SELECT count(*) FROM ta2");
-            this.rbCount = getOnce(statement, "SELECT count(*) FROM rb");
+            this.taCountF = DBUtil.getOnceByLong(statement, "SELECT count(*) FROM ta");
+            this.taCountB = DBUtil.getOnceByLong(statement, "SELECT count(*) FROM ta2");
         }
-    }
-
-    public long getOnce(Statement statement, String sql) throws SQLException {
-        try (ResultSet resultSet = statement.executeQuery(sql)) {
-            if (resultSet.next())
-                return resultSet.getInt(1);
-        }
-        return -1;
     }
 
     public ExpandableRunningResult(boolean isSuccess) {
@@ -277,10 +270,12 @@ public class ExpandableRunningResult extends RunningResult {
         return super.toString(dataSet);
     }
 
-    public void writeCSV(String logFile, String rbType, String dataSet, long timeRB) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
-        this.rbType = rbType;
+    public void writeCSV(String logFile, String dataSet, RechabilityResult rechabilityResult) throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
         this.dataSet = dataSet;
-        this.timeRB = timeRB;
+        this.rbType = rechabilityResult.getRechabilityTagName();
+        this.timeRB = rechabilityResult.getDelay();
+        this.rbCount = rechabilityResult.getRbCount();
+
         sumTime = timeRB + timeDelay;
 
         try (Writer writer = new FileWriter(logFile, true)) {

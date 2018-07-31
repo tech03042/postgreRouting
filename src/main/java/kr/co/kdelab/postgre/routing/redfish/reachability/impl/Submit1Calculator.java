@@ -1,13 +1,15 @@
 package kr.co.kdelab.postgre.routing.redfish.reachability.impl;
 
-import kr.co.kdelab.postgre.routing.redfish.reachability.RechabliltyCalculator;
+import kr.co.kdelab.postgre.routing.DBUtil;
+import kr.co.kdelab.postgre.routing.redfish.reachability.RechabilityCalculator;
+import kr.co.kdelab.postgre.routing.redfish.reachability.dataclass.RechabilityResult;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class Submit1Calculator extends RechabliltyCalculator {
+public class Submit1Calculator extends RechabilityCalculator {
     private boolean doubleUndirected;
 
     public Submit1Calculator(JDBConnectionInfo jdbConnectionInfo, boolean doubleUndirected) throws SQLException {
@@ -16,7 +18,8 @@ public class Submit1Calculator extends RechabliltyCalculator {
     }
 
     @Override
-    public void calc(int source, int target) throws SQLException {
+    public RechabilityResult calc(int source, int target) throws SQLException {
+        long t_start = System.currentTimeMillis();
         PreparedStatement expander;
         PreparedStatement deleter;
 
@@ -111,6 +114,9 @@ public class Submit1Calculator extends RechabliltyCalculator {
             statement.execute("TRUNCATE TABLE rb;");
             statement.execute("  INSERT INTO rb (nid) SELECT distinct nid FROM visited;");
 
+
+            long delay = System.currentTimeMillis() - t_start;
+            return new RechabilityResult("SUBMIT_1", delay, DBUtil.getOnceByLong(statement, "SELECT COUNT(*) FROM RB"));
         }
     }
 }

@@ -1,6 +1,8 @@
 package kr.co.kdelab.postgre.routing.redfish.reachability.impl;
 
-import kr.co.kdelab.postgre.routing.redfish.reachability.RechabliltyCalculator;
+import kr.co.kdelab.postgre.routing.DBUtil;
+import kr.co.kdelab.postgre.routing.redfish.reachability.RechabilityCalculator;
+import kr.co.kdelab.postgre.routing.redfish.reachability.dataclass.RechabilityResult;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 
 import java.sql.Connection;
@@ -8,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class JoinCalculator extends RechabliltyCalculator {
+public class JoinCalculator extends RechabilityCalculator {
     private JDBConnectionInfo jdbConnectionInfo;
 
 
@@ -117,7 +119,8 @@ public class JoinCalculator extends RechabliltyCalculator {
 
 
     @Override
-    public void calc(int source, int target) throws Exception {
+    public RechabilityResult calc(int source, int target) throws Exception {
+        long t_start = System.currentTimeMillis();
         Division divisions[] = new Division[]{new Forward(source, target), new Backward(source, target)};
         for (Division division : divisions)
             division.start();
@@ -135,6 +138,8 @@ public class JoinCalculator extends RechabliltyCalculator {
             statement.execute("DROP TABLE IF EXISTS rb; CREATE UNLOGGED TABLE rb(nid int primary key); " +
                     "insert into rb(nid) select distinct visited_f.nid FROM visited_f, visited_b WHERE visited_f.nid=visited_b.nid;" +
                     "DROP TABLE IF EXISTS visited_f; DROP TABLE IF EXISTS visited_b;");
+            long delay = System.currentTimeMillis() - t_start;
+            return new RechabilityResult("JOIN_R", delay, DBUtil.getOnceByLong(statement, "SELECT COUNT(*) FROM RB"));
         }
     }
 }

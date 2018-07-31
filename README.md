@@ -68,7 +68,7 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
 ```java
 // after prepared DataSet Table ( FULL TE )
 try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
-        calculator.calc(13576, 245646);
+        System.out.println(calculator.calc(13576, 245646));
 }
 
 ```
@@ -77,7 +77,7 @@ try (JoinCalculator calculator = new JoinCalculator(jDBConnectionInfo)) {
 // after prepared DataSet Table ( FULL TE )
 // Submit1Calculator ( JDBConnectionInfo, doubleUndirected # USA_ROAD-TRUE )
 try (Submit1Calculator calculator = new Submit1Calculator(jDBConnectionInfo, true)) {
-        calculator.calc(13576, 245646);
+        System.out.println(calculator.calc(13576, 245646));
 }
 ```
 5-1. Seo, implemented. RBFS

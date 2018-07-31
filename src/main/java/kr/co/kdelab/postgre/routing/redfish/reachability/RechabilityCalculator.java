@@ -1,5 +1,6 @@
 package kr.co.kdelab.postgre.routing.redfish.reachability;
 
+import kr.co.kdelab.postgre.routing.redfish.reachability.dataclass.RechabilityResult;
 import kr.co.kdelab.postgre.routing.redfish.reachability.util.PreparedStatementArray;
 
 import java.io.Closeable;
@@ -9,14 +10,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class RechabliltyCalculator implements Closeable {
+public class RechabilityCalculator implements Closeable {
     private Connection connection;
     private Statement statement;
     private PreparedStatementArray preparedStatements = new PreparedStatementArray();
     // PreparedStatement -> Array -> Close
 
 
-    public RechabliltyCalculator(Connection connection) throws SQLException {
+    public RechabilityCalculator(Connection connection) throws SQLException {
         this.connection = connection;
         statement = connection.createStatement();
     }
@@ -30,7 +31,8 @@ public class RechabliltyCalculator implements Closeable {
         return preparedStatement;
     }
 
-    public void calc(int source, int target) throws Exception {
+    public RechabilityResult calc(int source, int target) throws Exception {
+        return null;
     }
 
     protected Statement getCloseStatement() {

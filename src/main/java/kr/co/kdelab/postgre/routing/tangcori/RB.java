@@ -1,6 +1,6 @@
 package kr.co.kdelab.postgre.routing.tangcori;
 
-import kr.co.kdelab.postgre.routing.redfish.reachability.RechabliltyCalculator;
+import kr.co.kdelab.postgre.routing.redfish.reachability.RechabilityCalculator;
 import kr.co.kdelab.postgre.routing.redfish.reachability.impl.JoinCalculator;
 import kr.co.kdelab.postgre.routing.redfish.reachability.impl.Submit1Calculator;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
@@ -452,7 +452,7 @@ public class RB {
     }
 
     public static String P_Basic(JDBConnectionInfo jdbConnectionInfo, int source, int target, boolean isUndirected) {
-        try (RechabliltyCalculator JCal = new Submit1Calculator(jdbConnectionInfo, isUndirected)) {
+        try (RechabilityCalculator JCal = new Submit1Calculator(jdbConnectionInfo, isUndirected)) {
             JCal.calc(source, target);
         } catch (Exception e) {
             e.printStackTrace();
