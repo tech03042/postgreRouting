@@ -27,10 +27,6 @@ public class RunningResultSuccess extends RunningResult {
         this.strPath = strPath;
     }
 
-    public void writeCSV() {
-
-    }
-
     @Override
     public String toString() {
         return String.format("When started : %s\n", strStartTime)

@@ -2,6 +2,7 @@ package kr.co.kdelab.postgre.routing.tangcori.test;
 
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathBuilder;
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathOptionType;
+import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.ExpandableRunningResult;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResult;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.*;
 import kr.co.kdelab.postgre.routing.redfish.reachability.impl.Submit1Calculator;
@@ -15,9 +16,9 @@ public class Tester {
     private static RunningResult SeoRBFS(JDBConnectionInfo jdbConnectionInfo, int pts, int pv, int source, int target) throws Exception {
         try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jdbConnectionInfo)) {
             shortestPathBuilder
+                    .Option(new ERClear())
                     .Option(new TAClear(ShortestPathOptionType.RUNNING_PRE))
                     // TA Clear
-                    .Option(new ERClear())
                     .Option(new PrepareSeoRBFS())
                     // BD Thread Table Prepare
                     .Runner(new SeoRBFSRunnerReached(pts, pv));
@@ -120,8 +121,12 @@ public class Tester {
             RunningResult runningResult;
             runningResult = SeoRBFS(jdbConnectionInfo, pts, pv, source, target);
 
-            System.out.println(runningResult);
-            logFile.append(runningResult.toString(filename)).append("\n");
+            if (runningResult instanceof ExpandableRunningResult) {
+                ((ExpandableRunningResult) runningResult).writeCSV("log/test.csv", "TESTRB", filename, t_reaching);
+            } else {
+                System.out.println(runningResult);
+                logFile.append(runningResult.toString(filename)).append("\n");
+            }
         }
 
     }

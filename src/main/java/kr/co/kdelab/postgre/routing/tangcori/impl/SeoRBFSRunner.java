@@ -1,6 +1,7 @@
 package kr.co.kdelab.postgre.routing.tangcori.impl;
 
 import kr.co.kdelab.postgre.routing.redfish.algo.ShortestPathRunner;
+import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.ExpandableRunningResult;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResult;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResultError;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResultSuccess;
@@ -64,9 +65,9 @@ public abstract class SeoRBFSRunner extends ShortestPathRunner {
         long start_t = System.currentTimeMillis();
         prepare();
 
-        float minCost = Integer.MAX_VALUE; // minCost
-        float minCost0 = 0;
-        float minCost1;
+        int minCost = Integer.MAX_VALUE; // minCost
+        int minCost0 = 0;
+        int minCost1;
 
         float dist[] = new float[]{0, 0};
         int affected[] = new int[]{1, 1};
@@ -114,9 +115,14 @@ public abstract class SeoRBFSRunner extends ShortestPathRunner {
 
             // calculate minCost0
             minCost0 = minCost();
+            System.out.println(minCost0);
+            System.out.println(dist[FORWARD]);
+            System.out.println(dist[BACKWARD]);
+            System.out.println(minCost);
             if (minCost0 != 0) {
                 minCost = minCost0;
             }
+
 
         } // end while
 
@@ -139,7 +145,7 @@ public abstract class SeoRBFSRunner extends ShortestPathRunner {
         List<Integer> path = new LinkedList<>();
         path.addAll(p1);
         path.addAll(p2);
-        return new RunningResultSuccess(start_t, System.currentTimeMillis(), getSource(), getTarget(), (int) loopCount[FORWARD], (int) loopCount[BACKWARD], path.toString(), "Seo-RBFS", (long) minCost);
+        return new ExpandableRunningResult(getConnection(), getSource(), getTarget(), xid, (int) loopCount[FORWARD], (int) loopCount[BACKWARD], (long) minCost0, (long) minCost1, System.currentTimeMillis() - start_t, p1.size(), p2.size(), p1.toString(), p2.toString());
     }
 
     abstract int perform(int iteration, float minCost, float dist_sofar, boolean isForward) throws Exception;
@@ -155,8 +161,8 @@ public abstract class SeoRBFSRunner extends ShortestPathRunner {
         return xid;
     }
 
-    private float verification() throws SQLException {
-        float minCost1 = -1;
+    private int verification() throws SQLException {
+        int minCost1 = -1;
         try (ResultSet rs = verification.executeQuery()) {
             while (rs.next()) {
                 minCost1 = rs.getInt(1);
@@ -166,8 +172,8 @@ public abstract class SeoRBFSRunner extends ShortestPathRunner {
     }
 
 
-    private float minCost() throws SQLException {
-        float min = -1;
+    private int minCost() throws SQLException {
+        int min = 0;
 
         try (ResultSet rs = min_cost.executeQuery()) {
             if (rs.next())
