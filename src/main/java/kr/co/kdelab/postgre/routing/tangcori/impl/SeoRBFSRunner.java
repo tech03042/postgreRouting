@@ -115,10 +115,6 @@ public abstract class SeoRBFSRunner extends ShortestPathRunner {
 
             // calculate minCost0
             minCost0 = minCost();
-            System.out.println(minCost0);
-            System.out.println(dist[FORWARD]);
-            System.out.println(dist[BACKWARD]);
-            System.out.println(minCost);
             if (minCost0 != 0) {
                 minCost = minCost0;
             }
@@ -135,13 +131,12 @@ public abstract class SeoRBFSRunner extends ShortestPathRunner {
         //System.out.println("minCost="+minCost);
         // locate xid
         xid = locateXid(minCost);
-
-        //System.out.println("xid="+xid);
-        List<Integer> p1 = extractPathToXid(getSource(), getTarget(), xid, true);
-        List<Integer> p2 = extractPathToXid(getSource(), getTarget(), xid, false);
-//        RBFS_Process_T = System.currentTimeMillis() - start_t;
         if (xid == -1)
             return new RunningResultError("XID NOT FOUND");
+
+        List<Integer> p1 = extractPathToXid(getSource(), getTarget(), xid, true);
+        List<Integer> p2 = extractPathToXid(getSource(), getTarget(), xid, false);
+
         List<Integer> path = new LinkedList<>();
         path.addAll(p1);
         path.addAll(p2);
