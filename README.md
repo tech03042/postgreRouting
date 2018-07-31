@@ -119,3 +119,8 @@ try (ShortestPathBuilder shortestPathBuilder = new ShortestPathBuilder().JDBC(jd
 - pgPL/SQL -> 개별적인 쿼리로 수정 ( 180728 )
 - BDThread(NY, 13576 => 245646) 28988 ms(R)+7080 ms (R), 58754 ms (N)
 - PartitioningApplier TE 테이블을 기본으로 생성하도록 변경
+
+
+##### 까먹는것 메모용
+- Submit1Calculator는 가장 처음에 했던 가지치기를 개선한것.
+    - 대상이 yago(DAG)일 경우에는 boolean 매개변수 false 전달 필요 
