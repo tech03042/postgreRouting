@@ -48,7 +48,7 @@ public class RunningResultSuccess extends RunningResult {
                 + String.format("Cost = %d\n", cost)
                 + String.format("Algorithm = %s\n", algoTag);
         if (rechabilityResult != null)
-            ret += rechabilityResult.toString();
+            ret += rechabilityResult.toString() + "\n";
         return ret;
     }
 

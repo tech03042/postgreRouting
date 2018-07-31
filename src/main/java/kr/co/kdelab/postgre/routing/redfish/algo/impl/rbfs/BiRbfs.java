@@ -85,9 +85,10 @@ public class BiRbfs extends ShortestPathRunner implements BidirectionImpl {
 
         minCost = Math.min(minCost, verification());
         int midNode = getMidNode(minCost);
+        // BACKWARD 로만 끝난 경우 S->M의 경로를 구할 필요 없음
         if (midNode == -1)
             return new RunningResultError("PATH NOT FOUND");
-        // BACKWARD 로만 끝난 경우 S->M의 경로를 구할 필요 없음
+
         ArrayList<Integer> path = new ArrayList<>(extractPath(getConnection(), midNode, FORWARD, true));
         path.remove(path.size() - 1); // 중간 노드가 겹침.
         path.addAll(extractPath(getConnection(), midNode, BACKWARD, true)); // FORWARD 로만 끝난 경우  M->T의 경로를 구할 필요 없음.
