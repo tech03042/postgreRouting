@@ -106,7 +106,7 @@ public class ShortestPathBuilder implements Closeable {
                 runningResult = new RunningResultError(e);
             }
             if (runningResult == null)
-                runningResult = new RunningResultError("NULL");
+                runningResult = new RunningResultError(new NullPointerException());
 
             runningResults.add(runningResult);
         }

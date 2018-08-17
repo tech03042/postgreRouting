@@ -34,4 +34,9 @@ public class TestSetFormat {
     public void setWeight(double weight) {
         this.weight = weight;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%d %d %f", nodeId, targetId, weight);
+    }
 }

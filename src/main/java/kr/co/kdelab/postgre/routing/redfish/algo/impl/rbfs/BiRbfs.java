@@ -27,6 +27,8 @@ public class BiRbfs extends ShortestPathRunner implements BidirectionImpl {
         this.pv = pv;
     }
 
+    private final String algoTag = "Bi-R BFS";
+
     private void prepareStatement() throws SQLException {
         minD2SStmt[FORWARD] = addPreparedStatement(getConnection().prepareStatement("SELECT MIN(d2s) from ta0 WHERE fwd=?")); // Listing4.3
         minD2SStmt[BACKWARD] = addPreparedStatement(getConnection().prepareStatement("SELECT MIN(d2s) from ta1 WHERE fwd=?"));
@@ -87,7 +89,7 @@ public class BiRbfs extends ShortestPathRunner implements BidirectionImpl {
         int midNode = getMidNode(minCost);
         // BACKWARD 로만 끝난 경우 S->M의 경로를 구할 필요 없음
         if (midNode == -1)
-            return new RunningResultError("PATH NOT FOUND");
+            return new RunningResultError(start, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], "PATH NOT FOUND", algoTag, minCost);
 
         ArrayList<Integer> path = new ArrayList<>(extractPath(getConnection(), midNode, FORWARD, true));
         path.remove(path.size() - 1); // 중간 노드가 겹침.
@@ -96,7 +98,7 @@ public class BiRbfs extends ShortestPathRunner implements BidirectionImpl {
 
 //        System.out.println(minCost);
 
-        return new RunningResultSuccess(start, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], path.toString(), "Bi-R BFS", minCost);
+        return new RunningResultSuccess(start, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], path.toString(), algoTag, minCost);
 
     }
 

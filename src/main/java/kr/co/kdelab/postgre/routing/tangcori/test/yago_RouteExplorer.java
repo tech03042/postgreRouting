@@ -1,12 +1,9 @@
 package kr.co.kdelab.postgre.routing.tangcori.test;
 
-import kr.co.kdelab.postgre.routing.redfish.reachability.RechabliltyCalculator;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class yago_RouteExplorer {
 

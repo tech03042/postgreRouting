@@ -123,9 +123,9 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
 
 
         int midNode = getMidNode(getConnection(), minCost);
-        if (midNode == -1 && shortFinish == -1) {
-            return new RunningResultError("PATH NOT FOUND");
-        }
+        if (midNode == -1 && shortFinish == -1)
+            return new RunningResultError(start, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], "PATH NOT FOUND", "ReachedBiDirection", minCost);
+
 
         if (shortFinish == BACKWARD)
             midNode = getTarget();

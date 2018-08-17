@@ -12,6 +12,7 @@ import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
 import java.io.File;
 import java.sql.Connection;
 
+@Deprecated
 public class NormalImporter extends ShortestPathOption {
 
     private String dataSet;

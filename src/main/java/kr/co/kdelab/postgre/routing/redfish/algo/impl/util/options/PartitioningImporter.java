@@ -38,7 +38,6 @@ public class PartitioningImporter extends ShortestPathOption {
         testSet.setApplier(new PostgrePartitioningApplier(pts, pv));
         try (Connection connection = jdbConnectionInfo.createConnection()) {
             testSet.applyInTable(connection);
-
         }
         testSet.close();
     }

@@ -110,17 +110,20 @@ public class BiDirectionalThread extends ShortestPathRunner implements Bidirecti
             thread.terminate();
 
         int midNode = getMidNode(getConnection(), minCost);
-        if (midNode == -1) {
-            return new RunningResultError("PATH NOT FOUND");
-        }
+        if (midNode == -1)
+            return new RunningResultError(start, System.currentTimeMillis(), getSource(), getTarget(), threads[FORWARD].getIteration(), threads[BACKWARD].getIteration(), "PATH NOT FOUND", getAlgoTag(), minCost);
 
 
         // BACKWARD 로만 끝난 경우 S->M의 경로를 구할 필요 없음
         List<Integer> path = new LinkedList<>(extractPath(getConnection(), midNode, FORWARD));
         path.remove(path.size() - 1); // 중간 노드가 겹침.
         path.addAll(extractPath(getConnection(), midNode, BACKWARD)); // FORWARD 로만 끝난 경우  M->T의 경로를 구할 필요 없음.
-        long end = System.currentTimeMillis();
 
+        return new RunningResultSuccess(start, System.currentTimeMillis(), getSource(), getTarget(), threads[FORWARD].getIteration(), threads[BACKWARD].getIteration(), path.toString(), getAlgoTag(), minCost);
+
+    }
+
+    private String getAlgoTag() {
         String algoTag = "Bidirectional Thread-FEM";
         switch (threadFlag) {
             case THREAD_USE_RB:
@@ -133,10 +136,7 @@ public class BiDirectionalThread extends ShortestPathRunner implements Bidirecti
                 algoTag = "Reached TA Indexed Bidirectional Thread-FEM";
                 break;
         }
-
-        return new RunningResultSuccess(start, end, getSource(), getTarget(), threads[FORWARD].getIteration(), threads[BACKWARD].getIteration(), path.toString(), algoTag, minCost);
-
+        return algoTag;
     }
-
 
 }

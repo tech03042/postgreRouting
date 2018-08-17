@@ -123,8 +123,7 @@ public class BiDirection extends ShortestPathRunner implements BidirectionImpl {
 
         int midNode = getMidNode(getConnection(), minCost);
         if (midNode == -1 && shortFinish == -1)
-            return new RunningResultError("PATH NOT FOUND");
-
+            return new RunningResultError(start, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], "PATH NOT FOUND", "BiDirectional-FEM", minCost);
 
         if (shortFinish == BACKWARD)
             midNode = getTarget();

@@ -132,7 +132,7 @@ public abstract class SeoRBFSRunner extends ShortestPathRunner {
         // locate xid
         xid = locateXid(minCost);
         if (xid == -1)
-            return new RunningResultError("XID NOT FOUND");
+            return new RunningResultError(start_t, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], "PATH NOT FOUND", "SeoRBFS", minCost);
 
         List<Integer> p1 = extractPathToXid(getSource(), getTarget(), xid, true);
         List<Integer> p2 = extractPathToXid(getSource(), getTarget(), xid, false);
