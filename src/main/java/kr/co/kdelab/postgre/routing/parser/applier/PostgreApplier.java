@@ -45,6 +45,8 @@ public class PostgreApplier extends TableApplier {
         if (appended.length() != 0) {
             statement.execute(baseSQL.toString() + appended.toString() + tail);
         }
+
+        statement.execute("DELETE FROM TE WHERE fid=tid");
         connection.commit();
 
         statement.execute("CREATE INDEX IF NOT EXISTS TE_FID_IDX ON te USING hash(fid)");

@@ -17,7 +17,7 @@ public class TaIndexedThreadChild extends BDThreadChild {
                 ",mop AS (INSERT INTO " + getTableNameTA() + "(nid, d2s, p2s, fwd, f) " +
                 "( SELECT tid as nid, (cost+fop.d2s) as d2s, fid as p2s, ? as fwd, false as f" +
                 " FROM " + getTableNameTE() + ", fop " +
-                "WHERE fid=fop.nid and tid<>fop.nid ) ON CONFLICT(nid) DO UPDATE SET d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd,f=excluded.f" +
+                "WHERE fid=fop.nid ) ON CONFLICT(nid) DO UPDATE SET d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd,f=excluded.f" +
                 " WHERE " + getTableNameTA() + ".d2s>excluded.d2s RETURNING nid, d2s)" +
                 "SELECT count(nid) as affected, min(d2s) as mind2s FROM mop;";
     }
