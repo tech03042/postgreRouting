@@ -1,4 +1,4 @@
-log/
-resources/
-.idea/
-target/
+/log/
+/resources/
+/.idea/
+/target/

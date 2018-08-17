@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: kr.co.kdelab.postgre.routing.redfish.algo.test.RunnerTest
-
