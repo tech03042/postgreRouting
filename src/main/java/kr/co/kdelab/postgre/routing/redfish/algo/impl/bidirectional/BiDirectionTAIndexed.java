@@ -11,7 +11,7 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ReachedBiDirection extends ShortestPathRunner implements BidirectionImpl {
+public class BiDirectionTAIndexed extends ShortestPathRunner implements BidirectionImpl {
 
     private PreparedStatement[] stmtSelectFrontier = new PreparedStatement[2];
     private PreparedStatement[] stmtSetVisited = new PreparedStatement[2];
@@ -23,18 +23,18 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
 
     private void createStatement() throws SQLException {
         stmtSelectFrontier[FORWARD] = addPreparedStatement(
-                getConnection().prepareStatement("select nid,d2s from (select * from ta where nid not in ( select nid from ta where f=true ) ) as ta order by d2s asc limit 1")
+                getConnection().prepareStatement("select nid,d2s from ta where f=false order by f asc, d2s asc limit 1;")
         );
         stmtSelectFrontier[BACKWARD] = addPreparedStatement(
                 getConnection().prepareStatement(
-                        "select nid,d2s from (select * from ta2 where nid not in ( select nid from ta2 where f=true ) )  as ta2 order by d2s asc limit 1"));
+                        "select nid,d2s from ta2 where f=false order by f asc, d2s asc limit 1;"));
 
         stmtERMergeOP[FORWARD] = addPreparedStatement(
-                getConnection().prepareStatement("INSERT INTO ta(nid, d2s, p2s, fwd, f) (SELECT tid as nid, cost+? as d2s, ? as p2s, ? as fwd, false as f FROM TE, rb_f WHERE fid=? and rb_f.nid=TE.tid) ON CONFLICT(nid)" +
+                getConnection().prepareStatement("INSERT INTO ta(nid, d2s, p2s, fwd, f) (SELECT tid as nid, cost+? as d2s, ? as p2s, ? as fwd, false as f FROM TE WHERE fid=?) ON CONFLICT(nid)" +
                         "DO UPDATE SET  d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd,f=excluded.f " +
                         "WHERE ta.d2s>excluded.d2s"));
         stmtERMergeOP[BACKWARD] = addPreparedStatement(
-                getConnection().prepareStatement("INSERT INTO ta2(nid, d2s, p2s, fwd, f) (SELECT tid as nid, cost+? as d2s, ? as p2s, ? as fwd, false as f FROM te_b, rb_f WHERE fid=? and rb_f.nid=TE2.tid) ON CONFLICT(nid)" +
+                getConnection().prepareStatement("INSERT INTO ta2(nid, d2s, p2s, fwd, f) (SELECT tid as nid, cost+? as d2s, ? as p2s, ? as fwd, false as f FROM TE_B WHERE fid=?) ON CONFLICT(nid)" +
                         "DO UPDATE SET  d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd,f=excluded.f " +
                         "WHERE ta2.d2s>excluded.d2s"));
 
@@ -87,7 +87,6 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
 //            System.out.println(minCost);
 
             if (affected[FORWARD] == Integer.MAX_VALUE && affected[BACKWARD] == Integer.MAX_VALUE) {
-                System.out.println("?");
                 break;
             }
 
@@ -124,8 +123,7 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
 
         int midNode = getMidNode(getConnection(), minCost);
         if (midNode == -1 && shortFinish == -1)
-            return new RunningResultError(start, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], "PATH NOT FOUND", "ReachedBiDirection", minCost);
-
+            return new RunningResultError(start, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], "PATH NOT FOUND", "BiDirectional-FEM TA Indexed", minCost);
 
         if (shortFinish == BACKWARD)
             midNode = getTarget();
@@ -141,7 +139,7 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
             path.addAll(extractPath(getConnection(), midNode, BACKWARD)); // FORWARD 로만 끝난 경우  M->T의 경로를 구할 필요 없음.
 
 
-        return new RunningResultSuccess(start, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], path.toString(), "ReachedBiDirection", minCost);
+        return new RunningResultSuccess(start, System.currentTimeMillis(), getSource(), getTarget(), iteration[FORWARD], iteration[BACKWARD], path.toString(), "BiDirectional-FEM TA Indexed", minCost);
 
 
     }
