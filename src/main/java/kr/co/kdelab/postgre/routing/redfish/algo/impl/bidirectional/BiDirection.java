@@ -22,7 +22,7 @@ public class BiDirection extends ShortestPathRunner implements BidirectionImpl, 
 
     private void createStatement() throws SQLException {
         stmtSelectFrontier[FORWARD] = addPreparedStatement(
-                getConnection().prepareStatement("select nid,d2s from (select * from ta where nid not in ( select nid from ta where f=true ) ) as ta order by d2s asc limit 1")
+                getConnection().prepareStatement("select nid,d2s from ta WHERE ta.d2s=(select min(d2s) from ta where f=false) and f=false")
         );
         stmtSelectFrontier[BACKWARD] = addPreparedStatement(
                 getConnection().prepareStatement(
