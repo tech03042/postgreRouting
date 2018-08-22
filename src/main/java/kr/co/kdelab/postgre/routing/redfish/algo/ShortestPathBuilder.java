@@ -6,6 +6,7 @@ import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResult;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResultArray;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResultError;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.dataclass.RunningResultSuccess;
+import kr.co.kdelab.postgre.routing.redfish.algo.impl.rbfs.BiRbfs;
 import kr.co.kdelab.postgre.routing.redfish.algo.impl.util.options.RechabilityImporter;
 import kr.co.kdelab.postgre.routing.redfish.reachability.dataclass.RechabilityResult;
 import kr.co.kdelab.postgre.routing.redfish.util.JDBConnectionInfo;
@@ -68,7 +69,47 @@ public class ShortestPathBuilder implements Closeable {
         shortestPathRunner.setTarget(target);
 
         RunningResult runningResult = shortestPathRunner.run(jdbConnectionInfo);
+        shortestPathRunner.close();
+        DLog.debug("run", "end");
 
+        for (ShortestPathOption shortestPathOption : shortestPathRunningOptions[1]) {
+            DLog.debug("run-clean-start", shortestPathOption.getClass().toString());
+            shortestPathOption.run(jdbConnectionInfo);
+            DLog.debug("run-clean-end", shortestPathOption.getClass().toString());
+        }
+
+        if (runningResult instanceof RunningResultSuccess) {
+            ((RunningResultSuccess) runningResult).setRechabilityResult(rechabilityResult);
+        }
+        return runningResult;
+    }
+
+    public RunningResult run(int source, int target, int pts, int pv) throws Exception {
+        RechabilityResult rechabilityResult = null;
+        for (ShortestPathOption shortestPathOption : shortestPathRunningOptions[0]) {
+            DLog.debug("run-prepare-start", shortestPathOption.getClass().toString());
+            shortestPathOption.setSource(source);
+            shortestPathOption.setTarget(target);
+            shortestPathOption.run(jdbConnectionInfo);
+            DLog.debug("run-prepare-end", shortestPathOption.getClass().toString());
+
+            if (shortestPathOption instanceof RechabilityImporter)
+                rechabilityResult = ((RechabilityImporter) shortestPathOption).getRechabilityResult();
+        }
+
+
+        DLog.debug("run", "start");
+
+        shortestPathRunner.setSource(source);
+        shortestPathRunner.setTarget(target);
+
+        if (shortestPathRunner instanceof BiRbfs) {
+            ((BiRbfs) shortestPathRunner).setPts(pts);
+            ((BiRbfs) shortestPathRunner).setPv(pv);
+        }
+
+        RunningResult runningResult = shortestPathRunner.run(jdbConnectionInfo);
+        shortestPathRunner.close();
         DLog.debug("run", "end");
 
         for (ShortestPathOption shortestPathOption : shortestPathRunningOptions[1]) {

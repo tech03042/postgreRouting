@@ -48,41 +48,40 @@ public abstract class BDThreadChild extends Thread {
 
     private MergeResult p_mergeResult = new MergeResult(0, 0);
 
-    public String getTableNameTA() {
+    String getTableNameTA() {
         return tableNameTA;
     }
 
-    public String getTableNameTE() {
+    String getTableNameTE() {
         return tableNameTE;
     }
 
-    public abstract String getFEMSql();
+    public abstract String getFrontierSql();
+
+    // PreparedStatement.Params = ( Frontier.d2s, fwd, Frontier.nid );
+    public abstract String getExpandMergeSql();
+
 
     @Override
     public void run() {
         super.run();
 
         try (Connection connection = jdbConnectionInfo.createConnection()) {
-            PreparedStatement checkAllCheckedFF = connection.prepareStatement("SELECT nid FROM " + tableNameTA + " WHERE f=false limit 1");
-            PreparedStatement femStmt = connection.prepareStatement(
-                    getFEMSql());
+//            PreparedStatement checkAllCheckedFF = connection.prepareStatement("SELECT nid FROM " + tableNameTA + " WHERE f=false limit 1");
+            PreparedStatement frontier = connection.prepareStatement(
+                    getFrontierSql());
+            PreparedStatement expandMerge = connection.prepareStatement(getExpandMergeSql());
+
             while (!isTermination) {
-                MergeResult mergeResult = fem(femStmt, iteration);
+                MergeResult mergeResult = fem(frontier, expandMerge, iteration);
 
-                if (mergeResult != null) {
-                    if (mergeResult.affected != 0)
-                        affected = mergeResult.affected;
-                    else {
-                        affected = getUnFFCount(checkAllCheckedFF);
-                        if (affected == 0) {
-                            isTermination = true;
-                        }
-                    }
-
+                if (mergeResult == null) {
+                    isTermination = true;
+                    break;
                 }
-                if ((mergeResult != null ? mergeResult.affected : 0) != 0)
-                    dist = mergeResult.minCost;
 
+                affected = mergeResult.affected;
+                dist = mergeResult.minCost;
 
                 iteration++;
             }
@@ -94,26 +93,26 @@ public abstract class BDThreadChild extends Thread {
         isTermination = true;
     }
 
-    private int getUnFFCount(PreparedStatement preparedStatement) throws SQLException {
-        try (ResultSet resultSet = preparedStatement.executeQuery()) {
-            if (resultSet.next())
-                return 1;
-        }
-        return 0;
-    }
-
-
-    private MergeResult fem(PreparedStatement femStmt, int iteration) throws SQLException {
-        femStmt.setInt(1, iteration + 1);
-
-        // F, E, M Operator with 1 SQL
-        try (ResultSet resultSet = femStmt.executeQuery()) {
+    // IF TA TABLE IS EMPTY TERMINATE
+    private MergeResult fem(PreparedStatement frontier, PreparedStatement expandMerge, int iteration) throws SQLException {
+        int nid, d2s;
+        try (ResultSet resultSet = frontier.executeQuery()) {
             if (resultSet.next()) {
-                int affected = resultSet.getInt(1);
-                int minCost = resultSet.getInt(2);
+                nid = resultSet.getInt(1);
+                d2s = resultSet.getInt(2);
+            } else
+                return null;
+        }
 
-                p_mergeResult.affected = affected;
-                p_mergeResult.minCost = minCost;
+
+        expandMerge.setInt(1, d2s);
+        expandMerge.setInt(2, iteration + 1);
+        expandMerge.setInt(3, nid);
+
+        try (ResultSet resultSet = expandMerge.executeQuery()) {
+            if (resultSet.next()) {
+                p_mergeResult.affected = resultSet.getInt(1);
+                p_mergeResult.minCost = d2s;
                 return p_mergeResult;
             }
         }

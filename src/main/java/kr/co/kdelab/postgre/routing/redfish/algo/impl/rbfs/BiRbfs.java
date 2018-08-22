@@ -21,6 +21,14 @@ public class BiRbfs extends ShortestPathRunner implements BidirectionImpl {
     private int pts;
     private int pv;
 
+    public void setPts(int pts) {
+        this.pts = pts;
+    }
+
+    public void setPv(int pv) {
+        this.pv = pv;
+    }
+
     public BiRbfs(int pts, int pv) {
         super();
         this.pts = pts;

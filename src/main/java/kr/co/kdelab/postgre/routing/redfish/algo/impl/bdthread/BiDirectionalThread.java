@@ -91,9 +91,9 @@ public class BiDirectionalThread extends ShortestPathRunner implements Bidirecti
 
         int shuffleDirection = 1;
         while (threads[FORWARD].getDist() + threads[BACKWARD].getDist() <= minCost) {
-            if ((threads[FORWARD].getAffected() == 0 && threads[BACKWARD].getAffected() == 0) || (threads[FORWARD].isTermination() && threads[BACKWARD].isTermination())) {
+            if (threads[FORWARD].isTermination() && threads[BACKWARD].isTermination())
                 break;
-            }
+
 
             Thread.sleep(DELAY_MAIN);
             shuffleDirection = shuffleDirection == 0 ? 1 : 0;

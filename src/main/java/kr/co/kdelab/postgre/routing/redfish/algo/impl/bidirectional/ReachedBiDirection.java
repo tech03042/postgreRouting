@@ -11,13 +11,12 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ReachedBiDirection extends ShortestPathRunner implements BidirectionImpl {
+public class ReachedBiDirection extends ShortestPathRunner implements BidirectionImpl, SingleThreadImpl {
 
     private PreparedStatement[] stmtSelectFrontier = new PreparedStatement[2];
     private PreparedStatement[] stmtSetVisited = new PreparedStatement[2];
     private PreparedStatement[] stmtIsVisited = new PreparedStatement[2];
     private PreparedStatement[] stmtERMergeOP = new PreparedStatement[2];
-    private PreparedStatement[] stmtMinCost = new PreparedStatement[2];
 
     private PreparedStatement stmtEquallyExpandedCost = null;
 
@@ -53,10 +52,10 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
                 getConnection().prepareStatement("select nid from ta2 where nid = ? and f = true"));
 
 
-        stmtMinCost[FORWARD] = addPreparedStatement(
-                getConnection().prepareStatement("SELECT MIN(d2s) from ta WHERE fwd = ?"));
-        stmtMinCost[BACKWARD] = addPreparedStatement(
-                getConnection().prepareStatement("SELECT MIN(d2s) from ta2 WHERE fwd = ?"));
+//        stmtMinCost[FORWARD] = addPreparedStatement(
+//                getConnection().prepareStatement("SELECT MIN(d2s) from ta WHERE fwd = ?"));
+//        stmtMinCost[BACKWARD] = addPreparedStatement(
+//                getConnection().prepareStatement("SELECT MIN(d2s) from ta2 WHERE fwd = ?"));
 
 
     }
@@ -87,7 +86,6 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
 //            System.out.println(minCost);
 
             if (affected[FORWARD] == Integer.MAX_VALUE && affected[BACKWARD] == Integer.MAX_VALUE) {
-                System.out.println("?");
                 break;
             }
 
@@ -97,7 +95,7 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
             if (affected[reverse] != Integer.MAX_VALUE)
                 affected[reverse]--;
 
-            MergeResult mergeResult = fem(iteration[direction], direction);
+            MergeResult mergeResult = singleFEM(stmtERMergeOP[direction], iteration[direction], direction);
             affected[direction] = mergeResult.affected;
             if (mergeResult.affected != Integer.MAX_VALUE) {
                 if (mergeResult.minCost != 0)
@@ -147,7 +145,8 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
     }
 
 
-    private FrontierResult getFrontier(int direction) throws SQLException {
+    @Override
+    public FrontierResult getFrontier(int direction) throws SQLException {
         try (ResultSet rs = stmtSelectFrontier[direction].executeQuery()) {
             if (rs.next())
                 return new FrontierResult(rs.getInt(1), rs.getInt(2));
@@ -155,36 +154,10 @@ public class ReachedBiDirection extends ShortestPathRunner implements Bidirectio
         return null;
     }
 
-    private void setVisited(int direction, int nodeId) throws SQLException {
+    @Override
+    public void setVisited(int direction, int nodeId) throws SQLException {
         stmtSetVisited[direction].setInt(1, nodeId);
         stmtSetVisited[direction].executeUpdate();
     }
-
-    private MergeResult fem(int iteration, int direction) throws SQLException {
-        MergeResult mergeResult = new MergeResult(0, 0);
-
-
-        FrontierResult frontierResult = getFrontier(direction);
-        if (frontierResult == null) {
-            mergeResult.affected = Integer.MAX_VALUE;
-            return mergeResult;
-        }
-
-        setVisited(direction, frontierResult.getNodeId());
-
-        stmtERMergeOP[direction].setInt(1, frontierResult.getCost());
-        stmtERMergeOP[direction].setInt(2, frontierResult.getNodeId());
-        stmtERMergeOP[direction].setInt(3, iteration + 1);
-        stmtERMergeOP[direction].setInt(4, frontierResult.getNodeId());
-
-        stmtMinCost[direction].setInt(1, iteration + 1);
-        mergeResult.affected = stmtERMergeOP[direction].executeUpdate();
-        try (ResultSet resultSet = stmtMinCost[direction].executeQuery()) {
-            if (resultSet.next())
-                mergeResult.minCost = resultSet.getInt(1);
-        }
-        return mergeResult;
-    }
-
 
 }

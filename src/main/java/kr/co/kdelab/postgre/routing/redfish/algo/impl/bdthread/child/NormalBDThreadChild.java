@@ -9,16 +9,33 @@ public class NormalBDThreadChild extends BDThreadChild {
         super(jdbConnectionInfo, getTableNameTA, tableNameTE);
     }
 
+//    @Deprecated
+//    @Override
+//    public String getFEMSql() {
+//        return "WITH fop AS " +
+//                "(UPDATE " + getTableNameTA() + " set f = true where nid = (select nid from " + getTableNameTA() + " where f=false and d2s=(select min(d2s) from " + getTableNameTA() + " where f=false) limit 1)" +
+//                " RETURNING nid,d2s) " +
+//                ",mop AS (INSERT INTO " + getTableNameTA() + "(nid, d2s, p2s, fwd, f) " +
+//                "( SELECT tid as nid, (cost+fop.d2s) as d2s, fid as p2s, ? as fwd, false as f" +
+//                " FROM " + getTableNameTE() + ", fop " +
+//                "WHERE fid=fop.nid ) ON CONFLICT(nid) DO UPDATE SET d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd,f=excluded.f" +
+//                " WHERE " + getTableNameTA() + ".d2s>excluded.d2s RETURNING nid, d2s)" +
+//                "SELECT count(nid) as affected, min(d2s) as mind2s FROM mop;";
+//    }
+
     @Override
-    public String getFEMSql() {
-        return "WITH fop AS " +
-                "(UPDATE " + getTableNameTA() + " set f = true where nid = (select nid from " + getTableNameTA() + " where f=false and d2s=(select min(d2s) from " + getTableNameTA() + " where f=false) limit 1)" +
-                " RETURNING nid,d2s) " +
-                ",mop AS (INSERT INTO " + getTableNameTA() + "(nid, d2s, p2s, fwd, f) " +
-                "( SELECT tid as nid, (cost+fop.d2s) as d2s, fid as p2s, ? as fwd, false as f" +
-                " FROM " + getTableNameTE() + ", fop " +
-                "WHERE fid=fop.nid ) ON CONFLICT(nid) DO UPDATE SET d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd,f=excluded.f" +
+    public String getFrontierSql() {
+        return "UPDATE " + getTableNameTA() + " set f = true where nid = (select nid from " + getTableNameTA() + " where f=false and d2s=(select min(d2s) from " + getTableNameTA() + " where f=false) limit 1)" +
+                " RETURNING nid,d2s";
+    }
+
+    @Override
+    public String getExpandMergeSql() {
+        return "WITH mop AS (INSERT INTO " + getTableNameTA() + "(nid, d2s, p2s, fwd, f) " +
+                "( SELECT tid as nid, (cost+?) as d2s, fid as p2s, ? as fwd, false as f" +
+                " FROM " + getTableNameTE() +
+                " WHERE fid=? ) ON CONFLICT(nid) DO UPDATE SET d2s=excluded.d2s, p2s=excluded.p2s, fwd=excluded.fwd,f=excluded.f" +
                 " WHERE " + getTableNameTA() + ".d2s>excluded.d2s RETURNING nid, d2s)" +
-                "SELECT count(nid) as affected, min(d2s) as mind2s FROM mop;";
+                "SELECT count(nid) as affected FROM mop;";
     }
 }
